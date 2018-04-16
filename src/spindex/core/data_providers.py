@@ -1,7 +1,7 @@
 # Copyright (C) 2018 DataStorm
 #
 # This file is part of SpatialIndex.
-# 
+#
 # SpatialIndex is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -16,6 +16,12 @@
 # file or at <http://www.gnu.org/licenses/>.
 """
 Data containers for a spatially indexed collection of geometric shapes.
+
+The module aim to be compatible with many type of data and to evaluate lazily
+as much as possible. For example, :class:`GIShapes` data attribute can be
+any container implementing a subset of the Python mapping API. These can be
+dictionaries, pandas Series or pandas GeoSeries for example, but also an
+iterator on these types.
 """
 import abc
 import collections
@@ -68,7 +74,7 @@ class BaseShapes(abc.ABC):
         for idx, _ in toolz.take(n_neighbours, candidates):
             ogeom = self[idx]
             dist = geom.distance(ogeom)
-            heapq.heappush(heap, (-dist, idx))
+            heapq.heappush(heap, (-dist, idx))  # -dist to keep a min heap.
         # Keep only best n_neighbours elements until mindist is too high.
         for idx, mindist in candidates:
             if mindist >= -heap[0][0]:

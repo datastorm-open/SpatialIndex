@@ -32,15 +32,39 @@ OP_ARGLIST = ['knn', 'max_intersection']
 def st_join(left, right, how='left', op='knn', n_jobs=1, **kwargs):
     '''
     Spatial joins optimised with indexing on the right series.
-    
+
     A spatial join is a join based on a spatially defined predicate.
     The following types of joins are supported:
-    
+
         1. Nearest neighbours (knn): match
-        
+
     A spatial index on `right` is used to considerably limit the candidate
     matches in the right series. The types of joins supported are nearest
     neighbours (knn).
+
+    Parameters
+    ----------
+    left: mapping to Shapely geometries
+    right: spindex GIShapes
+    how: str (default 'left')
+        'left' or 'inner' for the type of join. Left joins are implemented so
+        far.
+    op: str (default 'knn')
+        * 'knn': true nearest-neighbours join. For each left geometry, it
+           finds the actual `n_neighbours`-nearest neighbours in the metric
+           given by the distance between shapes.
+    kwargs:
+        keyword arguments depending on `op`:
+            * 'knn': n_neighbours, int (default 1).
+
+    Yields
+    ------
+    List
+        The non-parallel version, generates for each left geometry a list of
+        length `n_neighbours` of 2-tuples of index and distance of/to the
+        nearest-neighbours.
+        The parallel version, generates a list of results as in the
+        non-parallel version of length `chunk_size`.
     '''
 
     # how argument
@@ -55,16 +79,15 @@ def st_join(left, right, how='left', op='knn', n_jobs=1, **kwargs):
     elif op == 'max_intersection':
         raise NotImplementedError
     else:
-        raise ValueError("how argument must be one of {}."
+        raise ValueError("op argument must be one of {}."
                          .format(','.join(OP_ARGLIST)))
 
     # n_jobs argument
     if n_jobs == 0:
-        raise ValueError("Number of jobs cannot be set to zero.")
+        raise ValueError("n_jobs cannot be set to zero.")
 
     elif n_jobs < 0:
-        raise NotImplementedError("Negative number of jobs are not "
-                                  "implemented yet.")
+        raise NotImplementedError("Negative n_jobs are not implemented yet.")
 
     elif n_jobs > 1:
         task_size = kwargs.get('task_size', 10**4)
