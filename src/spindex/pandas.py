@@ -1,6 +1,26 @@
 """
 Module wrapping pandas DataFrames.
+
+Summary
+^^^^^^^
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      st_join
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      GIFrame
+   
+
+Contents
+^^^^^^^^
 """
+import pdb
 import numpy
 import pandas
 
@@ -23,6 +43,7 @@ class GIFrame():
     def __init__(self, dframe):
         self.geometry = spindex.core.data_providers.GIShapes(
             dframe['geometry'])
+        self.geometry.create_index()
         self.attributes = dframe.drop('geometry', axis=1)
 
     def to_pandas(self):
@@ -100,6 +121,7 @@ def _wrap_knn(left, right, join, include_measure, **kwargs):
     pandas DataFrame
     """
     n_neighbours = kwargs.get("n_neighbours", 1)
+    pdb.set_trace()
     join = join.reshape(-1, join.shape[2])
     if include_measure:
         # join.shape is len(left) x n_neighbours x 2
