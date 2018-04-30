@@ -1,24 +1,5 @@
 """
 Module wrapping pandas DataFrames.
-
-Summary
-^^^^^^^
-   .. rubric:: Functions
-
-   .. autosummary::
-   
-      st_join
-
-   
-   .. rubric:: Classes
-
-   .. autosummary::
-   
-      GIFrame
-   
-
-Contents
-^^^^^^^^
 """
 import pdb
 import numpy
@@ -28,7 +9,7 @@ import spindex.core.data_providers
 import spindex.core.spatial_joins
 
 
-class GIFrame():
+class GeoFrame():
     """
     DataFrame class with a distinguish `GIShapes` class for geometries.
 

@@ -1,0 +1,411 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>API Reference &mdash; SpatialIndex v1.1.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Developpement" href="develop.html" />
+    <link rel="prev" title="Spatial Indexing" href="indexation.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> SpatialIndex
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v1.1.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Table of Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="indexation.html">Spatial Indexing</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#modules">Modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-spindex.pandas">Pandas Wrapper: <code class="docutils literal"><span class="pre">spindex.pandas</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#functions">Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#classes">Classes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-spindex.core.data_providers">Core Data Providers: <code class="docutils literal"><span class="pre">spindex.core.data_providers</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Classes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-spindex.core.enclosing_geometry">Enclosing Geometries: <code class="docutils literal"><span class="pre">spindex.core.enclosing_geometry</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id2">Classes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-spindex.core.spatial_index">Spatial Indexation: <code class="docutils literal"><span class="pre">spindex.core.spatial_index</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id3">Classes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-spindex.core.spatial_joins">Spatial Joins: <code class="docutils literal"><span class="pre">spindex.core.spatial_joins</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id4">Functions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="develop.html">Developpement</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">SpatialIndex</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>API Reference</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/api.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-spindex">
+<span id="api-reference"></span><h1>API Reference<a class="headerlink" href="#module-spindex" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="modules">
+<h2>Modules<a class="headerlink" href="#modules" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="modules/spindex.pandas.html#module-spindex.pandas" title="spindex.pandas"><code class="xref py py-obj docutils literal"><span class="pre">spindex.pandas</span></code></a></td>
+<td>Module wrapping pandas DataFrames.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="modules/spindex.core.data_providers.html#module-spindex.core.data_providers" title="spindex.core.data_providers"><code class="xref py py-obj docutils literal"><span class="pre">spindex.core.data_providers</span></code></a></td>
+<td>Data containers for a spatially indexed collection of geometric shapes.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="modules/spindex.core.enclosing_geometry.html#module-spindex.core.enclosing_geometry" title="spindex.core.enclosing_geometry"><code class="xref py py-obj docutils literal"><span class="pre">spindex.core.enclosing_geometry</span></code></a></td>
+<td>Enclosing geometry classes.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="modules/spindex.core.spatial_index.html#module-spindex.core.spatial_index" title="spindex.core.spatial_index"><code class="xref py py-obj docutils literal"><span class="pre">spindex.core.spatial_index</span></code></a></td>
+<td>Spatial Index data structure and algorithms.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="modules/spindex.core.spatial_joins.html#module-spindex.core.spatial_joins" title="spindex.core.spatial_joins"><code class="xref py py-obj docutils literal"><span class="pre">spindex.core.spatial_joins</span></code></a></td>
+<td>Spatial joins using indexing.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="module-spindex.pandas">
+<span id="pandas-wrapper-spindex-pandas"></span><h2>Pandas Wrapper: <a class="reference internal" href="modules/spindex.pandas.html#module-spindex.pandas" title="spindex.pandas"><code class="xref py py-mod docutils literal"><span class="pre">spindex.pandas</span></code></a><a class="headerlink" href="#module-spindex.pandas" title="Permalink to this headline">¶</a></h2>
+<p>Module wrapping pandas DataFrames.</p>
+<div class="section" id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="modules/spindex.pandas.html#spindex.pandas.st_join" title="spindex.pandas.st_join"><code class="xref py py-obj docutils literal"><span class="pre">st_join</span></code></a>(left,&nbsp;right[,&nbsp;how,&nbsp;op,&nbsp;include_measure])</td>
+<td>Spatial joins for DataFrames.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">spindex.pandas.GeoFrame</span></code>(dframe)</td>
+<td>DataFrame class with a distinguish <cite>GIShapes</cite> class for geometries.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="module-spindex.core.data_providers">
+<span id="core-data-providers-spindex-core-data-providers"></span><h2>Core Data Providers: <a class="reference internal" href="modules/spindex.core.data_providers.html#module-spindex.core.data_providers" title="spindex.core.data_providers"><code class="xref py py-mod docutils literal"><span class="pre">spindex.core.data_providers</span></code></a><a class="headerlink" href="#module-spindex.core.data_providers" title="Permalink to this headline">¶</a></h2>
+<p>Data containers for a spatially indexed collection of geometric shapes.</p>
+<p>The module aim to be compatible with many type of data and to evaluate lazily
+as much as possible. For example, <a class="reference internal" href="modules/spindex.core.data_providers.html#spindex.core.data_providers.GIShapes" title="spindex.core.data_providers.GIShapes"><code class="xref py py-class docutils literal"><span class="pre">GIShapes</span></code></a> data attribute can be
+any container implementing a subset of the Python mapping API. These can be
+dictionaries, pandas Series or pandas GeoSeries for example, but also an
+iterator on these types.</p>
+<div class="section" id="id1">
+<h3>Classes<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="modules/spindex.core.data_providers.html#spindex.core.data_providers.BaseShapes" title="spindex.core.data_providers.BaseShapes"><code class="xref py py-obj docutils literal"><span class="pre">BaseShapes</span></code></a></td>
+<td>Base algorithms on indexed shapes.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="modules/spindex.core.data_providers.html#spindex.core.data_providers.GIShapes" title="spindex.core.data_providers.GIShapes"><code class="xref py py-obj docutils literal"><span class="pre">GIShapes</span></code></a>(data[,&nbsp;itree,&nbsp;ecls])</td>
+<td>In-memory container of spatially indexed shapes.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="module-spindex.core.enclosing_geometry">
+<span id="enclosing-geometries-spindex-core-enclosing-geometry"></span><h2>Enclosing Geometries: <a class="reference internal" href="modules/spindex.core.enclosing_geometry.html#module-spindex.core.enclosing_geometry" title="spindex.core.enclosing_geometry"><code class="xref py py-mod docutils literal"><span class="pre">spindex.core.enclosing_geometry</span></code></a><a class="headerlink" href="#module-spindex.core.enclosing_geometry" title="Permalink to this headline">¶</a></h2>
+<p>Enclosing geometry classes.</p>
+<p>Spatial indexes are built using simplifications of geometrical shapes. The
+simplified geometries are shapes enclosing the given geometry.</p>
+<p>Classically, axis-aligned minimum bounding boxes (AAMBR) are used as a
+representation. This choice is in our opinion mainly due to its simplicity.
+Equally simple from the point of vue of both computational and memory
+efficiency is the smallest bounding sphere (SBS). The latter exhibit a few
+advantages over AAMBR, and is also implemented in this module.</p>
+<div class="section" id="id2">
+<h3>Classes<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="modules/spindex.core.enclosing_geometry.html#spindex.core.enclosing_geometry.Enclosing_Geometry" title="spindex.core.enclosing_geometry.Enclosing_Geometry"><code class="xref py py-obj docutils literal"><span class="pre">Enclosing_Geometry</span></code></a></td>
+<td>Abstract interface for an enclosing representation of a geometric shape.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="modules/spindex.core.enclosing_geometry.html#spindex.core.enclosing_geometry.Rect" title="spindex.core.enclosing_geometry.Rect"><code class="xref py py-obj docutils literal"><span class="pre">Rect</span></code></a>(*args[,&nbsp;buf])</td>
+<td>Axis-aligned minimum bounding rectangle.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="modules/spindex.core.enclosing_geometry.html#spindex.core.enclosing_geometry.Sphere" title="spindex.core.enclosing_geometry.Sphere"><code class="xref py py-obj docutils literal"><span class="pre">Sphere</span></code></a>(*args[,&nbsp;buf])</td>
+<td>Smallest bounding sphere.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="module-spindex.core.spatial_index">
+<span id="spatial-indexation-spindex-core-spatial-index"></span><h2>Spatial Indexation: <a class="reference internal" href="modules/spindex.core.spatial_index.html#module-spindex.core.spatial_index" title="spindex.core.spatial_index"><code class="xref py py-mod docutils literal"><span class="pre">spindex.core.spatial_index</span></code></a><a class="headerlink" href="#module-spindex.core.spatial_index" title="Permalink to this headline">¶</a></h2>
+<p>Spatial Index data structure and algorithms.</p>
+<p>The base data structure is the class <a class="reference internal" href="modules/spindex.core.spatial_index.html#spindex.core.spatial_index.IndexTree" title="spindex.core.spatial_index.IndexTree"><code class="xref py py-class docutils literal"><span class="pre">IndexTree</span></code></a>.
+Different algorithms for building such a tree are provided via subclasses of
+<a class="reference internal" href="modules/spindex.core.spatial_index.html#spindex.core.spatial_index.IndexTree" title="spindex.core.spatial_index.IndexTree"><code class="xref py py-class docutils literal"><span class="pre">IndexTree</span></code></a>.</p>
+<div class="section" id="id3">
+<h3>Classes<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="modules/spindex.core.spatial_index.html#spindex.core.spatial_index.DKMeans" title="spindex.core.spatial_index.DKMeans"><code class="xref py py-obj docutils literal"><span class="pre">DKMeans</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td>Index based on Divisive Hierarchical Clustering via KMeans.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="modules/spindex.core.spatial_index.html#spindex.core.spatial_index.IndexTree" title="spindex.core.spatial_index.IndexTree"><code class="xref py py-obj docutils literal"><span class="pre">IndexTree</span></code></a>([max_children,&nbsp;max_leaves])</td>
+<td>Data structure of a spatial index tree.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="module-spindex.core.spatial_joins">
+<span id="spatial-joins-spindex-core-spatial-joins"></span><h2>Spatial Joins: <a class="reference internal" href="modules/spindex.core.spatial_joins.html#module-spindex.core.spatial_joins" title="spindex.core.spatial_joins"><code class="xref py py-mod docutils literal"><span class="pre">spindex.core.spatial_joins</span></code></a><a class="headerlink" href="#module-spindex.core.spatial_joins" title="Permalink to this headline">¶</a></h2>
+<p>Spatial joins using indexing.</p>
+<div class="section" id="id4">
+<h3>Functions<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="modules/spindex.core.spatial_joins.html#spindex.core.spatial_joins.st_join" title="spindex.core.spatial_joins.st_join"><code class="xref py py-obj docutils literal"><span class="pre">st_join</span></code></a>(left,&nbsp;right[,&nbsp;how,&nbsp;op,&nbsp;n_jobs])</td>
+<td>Spatial joins optimised with indexing on the right series.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="develop.html" class="btn btn-neutral float-right" title="Developpement" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="indexation.html" class="btn btn-neutral" title="Spatial Indexing" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, DataStorm.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'v1.1.1',
+            LANGUAGE:'en',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          
+          SphinxRtdTheme.Navigation.enableSticky();
+          
+      });
+  </script> 
+
+</body>
+</html>

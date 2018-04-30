@@ -36,7 +36,9 @@ import spindex.core.spatial_index
 # Algorithms are common to all types of containers. They are implemented in
 # the BaseShapes class inherited by the shape containers.
 class BaseShapes(abc.ABC):
-    """Base algorithms on indexed shapes."""
+    """
+    Base class for indexed shapes.
+    """
     __slots__ = ('data', 'itree', '_enclose_class')
 
     @abc.abstractmethod
@@ -74,7 +76,7 @@ class BaseShapes(abc.ABC):
         for idx, _ in toolz.take(n_neighbours, candidates):
             ogeom = self[idx]
             dist = geom.distance(ogeom)
-            heapq.heappush(heap, (-dist, idx))  # -dist to keep a min heap.
+            heapq.heappush(heap, (-dist, idx))  # -dist to keep a max heap.
         # Keep only best n_neighbours elements until mindist is too high.
         for idx, mindist in candidates:
             if mindist >= -heap[0][0]:
@@ -97,7 +99,7 @@ class GIShapes(BaseShapes):
     itree: IndexTree
         A spatial index over `data` containing indices of the mapping.
     _enclose_class:
-        A concrete enclosing geometry used in the IndexTree.
+        A concrete enclosing geometry class used in the IndexTree.
     """
     __slots__ = ()
 
@@ -130,9 +132,11 @@ class GIShapes(BaseShapes):
         return self.data[idx]
 
     def keys(self):
+        """Lazily evaluates through the keys."""
         return self.data.keys()
 
     def values(self):
+        """Lazily evaluates through the values."""
         try:
             return self.data.values()
         except TypeError:
@@ -140,13 +144,16 @@ class GIShapes(BaseShapes):
         return self.data.values
 
     def items(self):
+        """Lazily evaluates through the (key, value) pairs."""
         return self.data.items()
 
-    def get(self, idx):
-        return self.data.get(idx)
+    def get(self, idx, default=None):
+        """Get item from object for given key or return default value."""
+        return self.data.get(idx, default)
 
     # We assume that data fits into memory.
     def create_index(self):
+        """Builds the index on the shapes."""
         pgeoms = collections.OrderedDict(
             [(k, self._enclose_class(v)) for k, v in self.data.items()]
         )

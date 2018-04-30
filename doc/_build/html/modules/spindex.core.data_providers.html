@@ -1,0 +1,334 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>spindex.core.data_providers &mdash; SpatialIndex v1.1.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> SpatialIndex
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v1.1.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Table of Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../indexation.html">Spatial Indexing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../develop.html">Developpement</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SpatialIndex</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>spindex.core.data_providers</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/modules/spindex.core.data_providers.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="spindex-core-data-providers">
+<h1>spindex.core.data_providers<a class="headerlink" href="#spindex-core-data-providers" title="Permalink to this headline">¶</a></h1>
+<p class="rubric">Classes</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#spindex.core.data_providers.BaseShapes" title="spindex.core.data_providers.BaseShapes"><code class="xref py py-obj docutils literal"><span class="pre">BaseShapes</span></code></a></td>
+<td>Base algorithms on indexed shapes.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#spindex.core.data_providers.GIShapes" title="spindex.core.data_providers.GIShapes"><code class="xref py py-obj docutils literal"><span class="pre">GIShapes</span></code></a>(data[,&nbsp;itree,&nbsp;ecls])</td>
+<td>In-memory container of spatially indexed shapes.</td>
+</tr>
+</tbody>
+</table>
+<span class="target" id="module-spindex.core.data_providers"></span><p>Data containers for a spatially indexed collection of geometric shapes.</p>
+<p>The module aim to be compatible with many type of data and to evaluate lazily
+as much as possible. For example, <a class="reference internal" href="#spindex.core.data_providers.GIShapes" title="spindex.core.data_providers.GIShapes"><code class="xref py py-class docutils literal"><span class="pre">GIShapes</span></code></a> data attribute can be
+any container implementing a subset of the Python mapping API. These can be
+dictionaries, pandas Series or pandas GeoSeries for example, but also an
+iterator on these types.</p>
+<dl class="class">
+<dt id="spindex.core.data_providers.BaseShapes">
+<em class="property">class </em><code class="descclassname">spindex.core.data_providers.</code><code class="descname">BaseShapes</code><a class="headerlink" href="#spindex.core.data_providers.BaseShapes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">abc.ABC</span></code></a></p>
+<p>Base algorithms on indexed shapes.</p>
+<dl class="attribute">
+<dt id="spindex.core.data_providers.BaseShapes.data">
+<code class="descname">data</code><a class="headerlink" href="#spindex.core.data_providers.BaseShapes.data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="spindex.core.data_providers.BaseShapes.itree">
+<code class="descname">itree</code><a class="headerlink" href="#spindex.core.data_providers.BaseShapes.itree" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="spindex.core.data_providers.BaseShapes.true_nearest">
+<code class="descname">true_nearest</code><span class="sig-paren">(</span><em>geom</em>, <em>n_neighbours=1</em><span class="sig-paren">)</span><a class="headerlink" href="#spindex.core.data_providers.BaseShapes.true_nearest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the true <cite>n_neighbours</cite>-nearest neighbours to <cite>geom</cite>.</p>
+<p>True nearest neighbours are sorted according to the actual distance
+between the geometries as given by their distance method.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>geom</strong> (<em>shapely geometry</em>) – The target geometry to which we provide neighbours.</li>
+<li><strong>n_neighbours</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – Then number of neighbours to return.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">List of the <a href="#id1"><span class="problematic" id="id2">:param:`n_neighbours`</span></a> nearest neighbours to
+<a href="#id3"><span class="problematic" id="id4">:param:`geom`</span></a>.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.6)">list</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="spindex.core.data_providers.GIShapes">
+<em class="property">class </em><code class="descclassname">spindex.core.data_providers.</code><code class="descname">GIShapes</code><span class="sig-paren">(</span><em>data</em>, <em>itree=&lt;spindex.core.spatial_index.DKMeans object&gt;</em>, <em>ecls=&lt;class 'spindex.core.enclosing_geometry.Rect'&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#spindex.core.data_providers.GIShapes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#spindex.core.data_providers.BaseShapes" title="spindex.core.data_providers.BaseShapes"><code class="xref py py-class docutils literal"><span class="pre">spindex.core.data_providers.BaseShapes</span></code></a></p>
+<p>In-memory container of spatially indexed shapes.</p>
+<dl class="attribute">
+<dt id="spindex.core.data_providers.GIShapes.data">
+<code class="descname">data</code><a class="headerlink" href="#spindex.core.data_providers.GIShapes.data" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>mapping to shapes</em> – A mapping (dict-like) object to shapes.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="spindex.core.data_providers.GIShapes.itree">
+<code class="descname">itree</code><a class="headerlink" href="#spindex.core.data_providers.GIShapes.itree" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>IndexTree</em> – A spatial index over <cite>data</cite> containing indices of the mapping.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="spindex.core.data_providers.GIShapes._enclose_class">
+<code class="descname">_enclose_class</code><a class="headerlink" href="#spindex.core.data_providers.GIShapes._enclose_class" title="Permalink to this definition">¶</a></dt>
+<dd><p>A concrete enclosing geometry used in the IndexTree.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="spindex.core.data_providers.GIShapes.create_index">
+<code class="descname">create_index</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#spindex.core.data_providers.GIShapes.create_index" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="spindex.core.data_providers.GIShapes.get">
+<code class="descname">get</code><span class="sig-paren">(</span><em>idx</em><span class="sig-paren">)</span><a class="headerlink" href="#spindex.core.data_providers.GIShapes.get" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="spindex.core.data_providers.GIShapes.items">
+<code class="descname">items</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#spindex.core.data_providers.GIShapes.items" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="spindex.core.data_providers.GIShapes.keys">
+<code class="descname">keys</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#spindex.core.data_providers.GIShapes.keys" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="spindex.core.data_providers.GIShapes.values">
+<code class="descname">values</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#spindex.core.data_providers.GIShapes.values" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, DataStorm.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'v1.1.1',
+            LANGUAGE:'en',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          
+          SphinxRtdTheme.Navigation.enableSticky();
+          
+      });
+  </script> 
+
+</body>
+</html>

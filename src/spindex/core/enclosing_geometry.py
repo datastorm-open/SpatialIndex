@@ -15,48 +15,67 @@
 # A copy of the GNU General Public License is available in the LICENSE
 # file or at <http://www.gnu.org/licenses/>.
 '''
-Enclosing geometry classes.
+Bounding volume classes.
 
 Spatial indexes are built using simplifications of geometrical shapes. The
-simplified geometries are shapes enclosing the given geometry.
+simplified geometries are shapes enclosing the given geometry and are called
+bounding volumes.
 
-Classically, axis-aligned minimum bounding boxes (AAMBR) are used as a
-representation. This choice is in our opinion mainly due to its simplicity.
-Equally simple from the point of vue of both computational and memory
-efficiency is the smallest bounding sphere (SBS). The latter exhibit a few
+Classically, axis-aligned minimum bounding boxes (AAMBR) are used.
+This choice is in our opinion mainly due to its simplicity.
+Equally simple from the point of vue of both space and computation efficiency
+is the smallest bounding sphere (SBS). The latter exhibit a few
 advantages over AAMBR, and is also implemented in this module.
 '''
-import pdb
 import abc
 import numpy
 import spindex.externals.smallest_enclosing_circle as secircle
 
 
 class Enclosing_Geometry(abc.ABC):
-    '''
-    Abstract interface for an enclosing representation of a geometric shape.
-    '''
+    """ 
+    Abstract interface for bounding volume class.
+
+    A bounding volume is a geometry enclosing entirely an underlying geometry.
+    Examples: axis-aligned minimum bounding rectangle (AAMBR) and smallest
+    bounding sphere (SBS).
+    """
     __slots__ = ()
 
     @abc.abstractmethod
     def intersects(self, other):
+        """
+        Returns True if `self` intersects the bounding volume `other`.
+        """
         pass
 
     @classmethod
     @abc.abstractmethod
     def merge(cls, collection):
+        """
+        Returns a bounding volume of a collection of bounding volumes.
+        """
         pass
 
     @abc.abstractmethod
     def center(self):
+        """Returns `self`'s barycenter."""
         pass
 
     @abc.abstractmethod
     def mindist(self, other):
+        """
+        Returns a lower bound on the distance between `self`'s and `other`'s
+        possible underlying geometries.
+        """
         pass
 
     @abc.abstractmethod
     def maxdist(self, other):
+        """
+        Returns an upper bound on the distance between `self`'s and `other`'s
+        possible underlying geometries.
+        """
         pass
 
 

@@ -184,4 +184,4 @@ intersphinx_mapping = {'https://docs.python.org/': None}
 
 
 
-autosummary_generate = False
+autosummary_generate = True
