@@ -29,7 +29,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Motivation" href="motivation.html" /> 
+    <link rel="next" title="Getting Started" href="quickstart.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -84,7 +84,6 @@
             
               <p class="caption"><span class="caption-text">Table of Contents</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="motivation.html">Motivation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="indexation.html">Spatial Indexing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
@@ -159,16 +158,29 @@
 <dl class="docutils">
 <dt>SpatialIndex provides in-memory solutions to:</dt>
 <dd><ul class="first last simple">
-<li>spatial indexing</li>
-<li>true nearest-neighbours (knn) queries and joins, optimised using a spatial index.</li>
+<li>spatial indexing via different types of bounding volumes hierarchies.</li>
+<li>true nearest-neighbors (knn) queries and joins, optimised using a spatial index.</li>
 </ul>
 </dd>
 </dl>
-<p>A true knn query is one that asks for the geometries minimising the actual distance to the reference geometry, as opposed to minimising an approximate distance like spatial indexes do. Computing the distance to all possible geometries is of linear complexity, which is prohibitive when looping over many reference geometries like in joins. Using a spatial index, we have in practice log complexity, although this is not theoretically assured.</p>
+<p>We’d like to warn users that the package is at a very early stage of development. We suggest not using it in production environment yet!</p>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>Given a geometry <img class="math" src="_images/math/307b3725cbb03398131f9ca542d79aff4933195f.png" alt="g"/> and a collection <img class="math" src="_images/math/afce44aa7c55836ca9345404c22fc7b599d2ed84.png" alt="C"/> of geometries, a nearest-neighbours query asks for the <img class="math" src="_images/math/0b7c1e16a3a8a849bb8ffdcdbf86f65fd1f30438.png" alt="k"/> nearest geometries in <img class="math" src="_images/math/afce44aa7c55836ca9345404c22fc7b599d2ed84.png" alt="C"/> to <img class="math" src="_images/math/307b3725cbb03398131f9ca542d79aff4933195f.png" alt="g"/>. Different adjective are used to describe which distance is minimized:</dt>
+<dd><ul class="first last simple">
+<li>Weak kNN-join: distance between the centroids of the underlying geometries.</li>
+<li>Approximate kNN-join: distance between bounding geometries to the underlying geometries.</li>
+<li>True kNN-join: distance between the geometries themselves.</li>
+</ul>
+</dd>
+</dl>
+<p>The brute force solution computes all pairwise distances between the geometries. It is of linear complexity, which is prohibitive when looping over many reference geometries like in spatial joins. Using an acceleration data structure such as a spatial index, we have in practice log complexity (although this is not theoretically assured). Acceleration can thus lead to impressive gains on large datasets.</p>
+<p>Nearest-neighbours search has been classically applied to points and has many implementations available (e.g. in scikit-learn). Accelerations are provided via data-structures such as kd-trees and ball-trees.</p>
+<p>However, spatial data can include other shapes. This package implements an in-memory spatial index assisted true kNN query/join between arbitrary geometries. It is similar to the recent PostgreSQL (9.5+) &lt;-&gt; operator solution.</p>
 <div class="toctree-wrapper compound">
 <p class="caption"><span class="caption-text">Table of Contents</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="motivation.html">Motivation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Getting Started</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="quickstart.html#pandas-wrapper">Pandas Wrapper</a></li>
 <li class="toctree-l2"><a class="reference internal" href="quickstart.html#spatial-joins">Spatial Joins</a></li>
@@ -188,6 +200,7 @@
 </ul>
 </div>
 </div>
+</div>
 <div class="section" id="indices-and-tables">
 <h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
 <ul class="simple">
@@ -205,7 +218,7 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="motivation.html" class="btn btn-neutral float-right" title="Motivation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="quickstart.html" class="btn btn-neutral float-right" title="Getting Started" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
     </div>

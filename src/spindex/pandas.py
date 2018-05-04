@@ -1,7 +1,6 @@
 """
 Module wrapping pandas DataFrames.
 """
-import pdb
 import numpy
 import pandas
 
@@ -46,7 +45,7 @@ def st_join(left, right, how='left', op='knn', include_measure=True, **kwargs):
     Parameters
     ----------
     left: pandas DataFrame
-    right: GIFrame or pandas DataFrame
+    right: GeoFrame or pandas DataFrame
     how: str (default 'left')
         'left' or 'inner' for the type of join. Left joins are implemented so
         far.
@@ -66,8 +65,8 @@ def st_join(left, right, how='left', op='knn', include_measure=True, **kwargs):
     pandas DataFrame
     """
     if isinstance(right, pandas.DataFrame):
-        right = GIFrame(right)
-    if isinstance(left, GIFrame):
+        right = GeoFrame(right)
+    if isinstance(left, GeoFrame):
         left = left.to_pandas()
     elif isinstance(left, pandas.DataFrame):
         geoms = left['geometry']
@@ -93,7 +92,7 @@ def _wrap_knn(left, right, join, include_measure, **kwargs):
     Parameters
     ----------
     left: pandas DataFrame
-    right: GIFrame
+    right: GeoFrame
     join: numpy array
         Result of the join.
 
@@ -102,7 +101,6 @@ def _wrap_knn(left, right, join, include_measure, **kwargs):
     pandas DataFrame
     """
     n_neighbours = kwargs.get("n_neighbours", 1)
-    pdb.set_trace()
     join = join.reshape(-1, join.shape[2])
     if include_measure:
         # join.shape is len(left) x n_neighbours x 2

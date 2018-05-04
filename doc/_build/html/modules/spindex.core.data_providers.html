@@ -161,7 +161,7 @@
 </colgroup>
 <tbody valign="top">
 <tr class="row-odd"><td><a class="reference internal" href="#spindex.core.data_providers.BaseShapes" title="spindex.core.data_providers.BaseShapes"><code class="xref py py-obj docutils literal"><span class="pre">BaseShapes</span></code></a></td>
-<td>Base algorithms on indexed shapes.</td>
+<td>Base class for indexed shapes.</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="#spindex.core.data_providers.GIShapes" title="spindex.core.data_providers.GIShapes"><code class="xref py py-obj docutils literal"><span class="pre">GIShapes</span></code></a>(data[,&nbsp;itree,&nbsp;ecls])</td>
 <td>In-memory container of spatially indexed shapes.</td>
@@ -178,7 +178,7 @@ iterator on these types.</p>
 <dt id="spindex.core.data_providers.BaseShapes">
 <em class="property">class </em><code class="descclassname">spindex.core.data_providers.</code><code class="descname">BaseShapes</code><a class="headerlink" href="#spindex.core.data_providers.BaseShapes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">abc.ABC</span></code></a></p>
-<p>Base algorithms on indexed shapes.</p>
+<p>Base class for indexed shapes.</p>
 <dl class="attribute">
 <dt id="spindex.core.data_providers.BaseShapes.data">
 <code class="descname">data</code><a class="headerlink" href="#spindex.core.data_providers.BaseShapes.data" title="Permalink to this definition">¶</a></dt>
@@ -238,33 +238,38 @@ between the geometries as given by their distance method.</p>
 <dl class="attribute">
 <dt id="spindex.core.data_providers.GIShapes._enclose_class">
 <code class="descname">_enclose_class</code><a class="headerlink" href="#spindex.core.data_providers.GIShapes._enclose_class" title="Permalink to this definition">¶</a></dt>
-<dd><p>A concrete enclosing geometry used in the IndexTree.</p>
+<dd><p>A concrete enclosing geometry class used in the IndexTree.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="spindex.core.data_providers.GIShapes.create_index">
 <code class="descname">create_index</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#spindex.core.data_providers.GIShapes.create_index" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Builds the index on the shapes.</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="spindex.core.data_providers.GIShapes.get">
-<code class="descname">get</code><span class="sig-paren">(</span><em>idx</em><span class="sig-paren">)</span><a class="headerlink" href="#spindex.core.data_providers.GIShapes.get" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="descname">get</code><span class="sig-paren">(</span><em>idx</em>, <em>default=None</em><span class="sig-paren">)</span><a class="headerlink" href="#spindex.core.data_providers.GIShapes.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get item from object for given key or return default value.</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="spindex.core.data_providers.GIShapes.items">
 <code class="descname">items</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#spindex.core.data_providers.GIShapes.items" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Lazily evaluates through the (key, value) pairs.</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="spindex.core.data_providers.GIShapes.keys">
 <code class="descname">keys</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#spindex.core.data_providers.GIShapes.keys" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Lazily evaluates through the keys.</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="spindex.core.data_providers.GIShapes.values">
 <code class="descname">values</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#spindex.core.data_providers.GIShapes.values" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Lazily evaluates through the values.</p>
+</dd></dl>
 
 </dd></dl>
 

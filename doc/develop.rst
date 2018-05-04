@@ -1,7 +1,18 @@
 Developpement
 =============
 
-.. rubric:: Design Goals
+The package is at an early stage of development.
+True kNN joins might be merged into an existing project.
+
+.. rubric:: Goals
+
+Provide Python/Cython solutions to the many bounding volumes hierarchies acceleration data-structures together with accelerated algorithms. 
+At the moment, we focus on spatial indexing and spatial joins.
+
+We would like to separate the following structures in order to allow for the implementation of many variants:
+    * Bounding Geometries: includes AAMBR, Enclosing Spheres, Convex Hulls, ...
+    * BVH-trees: data model for bounding volumes hierarchies tree-structures with abstract methods for insert, delete and their bulk versions.
+    * Metrics: functions to compute distances between geometries.
 
 We have set a few goals for the API:
 

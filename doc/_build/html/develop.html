@@ -154,7 +154,20 @@
             
   <div class="section" id="developpement">
 <h1>Developpement<a class="headerlink" href="#developpement" title="Permalink to this headline">¶</a></h1>
-<p class="rubric">Design Goals</p>
+<p>The package is at an early stage of development.
+True kNN joins might be merged into an existing project.</p>
+<p class="rubric">Goals</p>
+<p>Provide Python/Cython solutions to the many bounding volumes hierarchies acceleration data-structures together with accelerated algorithms.
+At the moment, we focus on spatial indexing and spatial joins.</p>
+<dl class="docutils">
+<dt>We would like to separate the following structures in order to allow for the implementation of many variants:</dt>
+<dd><ul class="first last simple">
+<li>Bounding Geometries: includes AAMBR, Enclosing Spheres, Convex Hulls, …</li>
+<li>BVH-trees: data model for bounding volumes hierarchies tree-structures with abstract methods for insert, delete and their bulk versions.</li>
+<li>Metrics: functions to compute distances between geometries.</li>
+</ul>
+</dd>
+</dl>
 <p>We have set a few goals for the API:</p>
 <blockquote>
 <div><ol class="arabic simple">

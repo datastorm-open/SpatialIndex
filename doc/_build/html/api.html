@@ -194,12 +194,12 @@
 <td>Data containers for a spatially indexed collection of geometric shapes.</td>
 </tr>
 <tr class="row-odd"><td><a class="reference internal" href="modules/spindex.core.enclosing_geometry.html#module-spindex.core.enclosing_geometry" title="spindex.core.enclosing_geometry"><code class="xref py py-obj docutils literal"><span class="pre">spindex.core.enclosing_geometry</span></code></a></td>
-<td>Enclosing geometry classes.</td>
+<td>Bounding volume classes.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="modules/spindex.core.spatial_index.html#module-spindex.core.spatial_index" title="spindex.core.spatial_index"><code class="xref py py-obj docutils literal"><span class="pre">spindex.core.spatial_index</span></code></a></td>
+<tr class="row-even"><td><a class="reference internal" href="#module-spindex.core.spatial_index" title="spindex.core.spatial_index"><code class="xref py py-obj docutils literal"><span class="pre">spindex.core.spatial_index</span></code></a></td>
 <td>Spatial Index data structure and algorithms.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="modules/spindex.core.spatial_joins.html#module-spindex.core.spatial_joins" title="spindex.core.spatial_joins"><code class="xref py py-obj docutils literal"><span class="pre">spindex.core.spatial_joins</span></code></a></td>
+<tr class="row-odd"><td><a class="reference internal" href="#module-spindex.core.spatial_joins" title="spindex.core.spatial_joins"><code class="xref py py-obj docutils literal"><span class="pre">spindex.core.spatial_joins</span></code></a></td>
 <td>Spatial joins using indexing.</td>
 </tr>
 </tbody>
@@ -254,7 +254,7 @@ iterator on these types.</p>
 </colgroup>
 <tbody valign="top">
 <tr class="row-odd"><td><a class="reference internal" href="modules/spindex.core.data_providers.html#spindex.core.data_providers.BaseShapes" title="spindex.core.data_providers.BaseShapes"><code class="xref py py-obj docutils literal"><span class="pre">BaseShapes</span></code></a></td>
-<td>Base algorithms on indexed shapes.</td>
+<td>Base class for indexed shapes.</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="modules/spindex.core.data_providers.html#spindex.core.data_providers.GIShapes" title="spindex.core.data_providers.GIShapes"><code class="xref py py-obj docutils literal"><span class="pre">GIShapes</span></code></a>(data[,&nbsp;itree,&nbsp;ecls])</td>
 <td>In-memory container of spatially indexed shapes.</td>
@@ -265,13 +265,14 @@ iterator on these types.</p>
 </div>
 <div class="section" id="module-spindex.core.enclosing_geometry">
 <span id="enclosing-geometries-spindex-core-enclosing-geometry"></span><h2>Enclosing Geometries: <a class="reference internal" href="modules/spindex.core.enclosing_geometry.html#module-spindex.core.enclosing_geometry" title="spindex.core.enclosing_geometry"><code class="xref py py-mod docutils literal"><span class="pre">spindex.core.enclosing_geometry</span></code></a><a class="headerlink" href="#module-spindex.core.enclosing_geometry" title="Permalink to this headline">¶</a></h2>
-<p>Enclosing geometry classes.</p>
+<p>Bounding volume classes.</p>
 <p>Spatial indexes are built using simplifications of geometrical shapes. The
-simplified geometries are shapes enclosing the given geometry.</p>
-<p>Classically, axis-aligned minimum bounding boxes (AAMBR) are used as a
-representation. This choice is in our opinion mainly due to its simplicity.
-Equally simple from the point of vue of both computational and memory
-efficiency is the smallest bounding sphere (SBS). The latter exhibit a few
+simplified geometries are shapes enclosing the given geometry and are called
+bounding volumes.</p>
+<p>Classically, axis-aligned minimum bounding boxes (AAMBR) are used.
+This choice is in our opinion mainly due to its simplicity.
+Equally simple from the point of vue of both space and computation efficiency
+is the smallest bounding sphere (SBS). The latter exhibit a few
 advantages over AAMBR, and is also implemented in this module.</p>
 <div class="section" id="id2">
 <h3>Classes<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
@@ -282,7 +283,7 @@ advantages over AAMBR, and is also implemented in this module.</p>
 </colgroup>
 <tbody valign="top">
 <tr class="row-odd"><td><a class="reference internal" href="modules/spindex.core.enclosing_geometry.html#spindex.core.enclosing_geometry.Enclosing_Geometry" title="spindex.core.enclosing_geometry.Enclosing_Geometry"><code class="xref py py-obj docutils literal"><span class="pre">Enclosing_Geometry</span></code></a></td>
-<td>Abstract interface for an enclosing representation of a geometric shape.</td>
+<td>Abstract interface for bounding volume class.</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="modules/spindex.core.enclosing_geometry.html#spindex.core.enclosing_geometry.Rect" title="spindex.core.enclosing_geometry.Rect"><code class="xref py py-obj docutils literal"><span class="pre">Rect</span></code></a>(*args[,&nbsp;buf])</td>
 <td>Axis-aligned minimum bounding rectangle.</td>
@@ -295,7 +296,7 @@ advantages over AAMBR, and is also implemented in this module.</p>
 </div>
 </div>
 <div class="section" id="module-spindex.core.spatial_index">
-<span id="spatial-indexation-spindex-core-spatial-index"></span><h2>Spatial Indexation: <a class="reference internal" href="modules/spindex.core.spatial_index.html#module-spindex.core.spatial_index" title="spindex.core.spatial_index"><code class="xref py py-mod docutils literal"><span class="pre">spindex.core.spatial_index</span></code></a><a class="headerlink" href="#module-spindex.core.spatial_index" title="Permalink to this headline">¶</a></h2>
+<span id="spatial-indexation-spindex-core-spatial-index"></span><h2>Spatial Indexation: <a class="reference internal" href="#module-spindex.core.spatial_index" title="spindex.core.spatial_index"><code class="xref py py-mod docutils literal"><span class="pre">spindex.core.spatial_index</span></code></a><a class="headerlink" href="#module-spindex.core.spatial_index" title="Permalink to this headline">¶</a></h2>
 <p>Spatial Index data structure and algorithms.</p>
 <p>The base data structure is the class <a class="reference internal" href="modules/spindex.core.spatial_index.html#spindex.core.spatial_index.IndexTree" title="spindex.core.spatial_index.IndexTree"><code class="xref py py-class docutils literal"><span class="pre">IndexTree</span></code></a>.
 Different algorithms for building such a tree are provided via subclasses of
@@ -319,7 +320,7 @@ Different algorithms for building such a tree are provided via subclasses of
 </div>
 </div>
 <div class="section" id="module-spindex.core.spatial_joins">
-<span id="spatial-joins-spindex-core-spatial-joins"></span><h2>Spatial Joins: <a class="reference internal" href="modules/spindex.core.spatial_joins.html#module-spindex.core.spatial_joins" title="spindex.core.spatial_joins"><code class="xref py py-mod docutils literal"><span class="pre">spindex.core.spatial_joins</span></code></a><a class="headerlink" href="#module-spindex.core.spatial_joins" title="Permalink to this headline">¶</a></h2>
+<span id="spatial-joins-spindex-core-spatial-joins"></span><h2>Spatial Joins: <a class="reference internal" href="#module-spindex.core.spatial_joins" title="spindex.core.spatial_joins"><code class="xref py py-mod docutils literal"><span class="pre">spindex.core.spatial_joins</span></code></a><a class="headerlink" href="#module-spindex.core.spatial_joins" title="Permalink to this headline">¶</a></h2>
 <p>Spatial joins using indexing.</p>
 <div class="section" id="id4">
 <h3>Functions<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>

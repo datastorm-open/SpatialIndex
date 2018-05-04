@@ -161,7 +161,7 @@
 </colgroup>
 <tbody valign="top">
 <tr class="row-odd"><td><a class="reference internal" href="#spindex.core.enclosing_geometry.Enclosing_Geometry" title="spindex.core.enclosing_geometry.Enclosing_Geometry"><code class="xref py py-obj docutils literal"><span class="pre">Enclosing_Geometry</span></code></a></td>
-<td>Abstract interface for an enclosing representation of a geometric shape.</td>
+<td>Abstract interface for bounding volume class.</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="#spindex.core.enclosing_geometry.Rect" title="spindex.core.enclosing_geometry.Rect"><code class="xref py py-obj docutils literal"><span class="pre">Rect</span></code></a>(*args[,&nbsp;buf])</td>
 <td>Axis-aligned minimum bounding rectangle.</td>
@@ -171,43 +171,54 @@
 </tr>
 </tbody>
 </table>
-<span class="target" id="module-spindex.core.enclosing_geometry"></span><p>Enclosing geometry classes.</p>
+<span class="target" id="module-spindex.core.enclosing_geometry"></span><p>Bounding volume classes.</p>
 <p>Spatial indexes are built using simplifications of geometrical shapes. The
-simplified geometries are shapes enclosing the given geometry.</p>
-<p>Classically, axis-aligned minimum bounding boxes (AAMBR) are used as a
-representation. This choice is in our opinion mainly due to its simplicity.
-Equally simple from the point of vue of both computational and memory
-efficiency is the smallest bounding sphere (SBS). The latter exhibit a few
+simplified geometries are shapes enclosing the given geometry and are called
+bounding volumes.</p>
+<p>Classically, axis-aligned minimum bounding boxes (AAMBR) are used.
+This choice is in our opinion mainly due to its simplicity.
+Equally simple from the point of vue of both space and computation efficiency
+is the smallest bounding sphere (SBS). The latter exhibit a few
 advantages over AAMBR, and is also implemented in this module.</p>
 <dl class="class">
 <dt id="spindex.core.enclosing_geometry.Enclosing_Geometry">
 <em class="property">class </em><code class="descclassname">spindex.core.enclosing_geometry.</code><code class="descname">Enclosing_Geometry</code><a class="headerlink" href="#spindex.core.enclosing_geometry.Enclosing_Geometry" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">abc.ABC</span></code></a></p>
-<p>Abstract interface for an enclosing representation of a geometric shape.</p>
+<p>Abstract interface for bounding volume class.</p>
+<p>A bounding volume is a geometry enclosing entirely an underlying geometry.
+Examples: axis-aligned minimum bounding rectangle (AAMBR) and smallest
+bounding sphere (SBS).</p>
 <dl class="method">
 <dt id="spindex.core.enclosing_geometry.Enclosing_Geometry.center">
 <code class="descname">center</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#spindex.core.enclosing_geometry.Enclosing_Geometry.center" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Returns <cite>self</cite>’s barycenter.</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="spindex.core.enclosing_geometry.Enclosing_Geometry.intersects">
 <code class="descname">intersects</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#spindex.core.enclosing_geometry.Enclosing_Geometry.intersects" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Returns True if <cite>self</cite> intersects the bounding volume <cite>other</cite>.</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="spindex.core.enclosing_geometry.Enclosing_Geometry.maxdist">
 <code class="descname">maxdist</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#spindex.core.enclosing_geometry.Enclosing_Geometry.maxdist" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Returns an upper bound on the distance between <cite>self</cite>’s and <cite>other</cite>’s
+possible underlying geometries.</p>
+</dd></dl>
 
 <dl class="classmethod">
 <dt id="spindex.core.enclosing_geometry.Enclosing_Geometry.merge">
 <em class="property">classmethod </em><code class="descname">merge</code><span class="sig-paren">(</span><em>collection</em><span class="sig-paren">)</span><a class="headerlink" href="#spindex.core.enclosing_geometry.Enclosing_Geometry.merge" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Returns a bounding volume of a collection of bounding volumes.</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="spindex.core.enclosing_geometry.Enclosing_Geometry.mindist">
 <code class="descname">mindist</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#spindex.core.enclosing_geometry.Enclosing_Geometry.mindist" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Returns a lower bound on the distance between <cite>self</cite>’s and <cite>other</cite>’s
+possible underlying geometries.</p>
+</dd></dl>
 
 </dd></dl>
 
