@@ -34,6 +34,8 @@ import spindex.core.enclosing_geometry
 
 # ====================  BGH Data Structure  =============================
 
+# Bounding Geometry Tree (aka bounding volumes hierarchy)
+#
 # Tree structure: node with list of children
 # Node stores bounding geometries, possibly a node_obj and its children.
 # For internal node, children is a list of children trees.
@@ -238,7 +240,7 @@ class Intersection():
     Attributes
     ----------
     op: one of ['within', 'contains', 'intersects']
-        Which predicate to use for the query.    
+        Which predicate to use for the query.
     """
     def __init__(self, op='intersects'):
         self.op=op
