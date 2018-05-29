@@ -29,11 +29,7 @@ setuptools.setup(
     version=1,
     author="Thomas Zamojski",
     author_email="thomas.zamojski@datastorm.fr",
-    packages=['spindex', 'spindex.core', 'spindex.externals'],
-    package_dir={'spindex': 'src/spindex',
-                 'spindex.core': 'src/spindex/core',
-                 'spindex.externals': 'src/spindex/externals',
-                 },
+    packages=setuptools.find_packages(exclude=['docs', 'tests']),
     package_data={'spindex': ['data/*']},
     # py_modules=[os.path.splitext(os.path.basename(path))[0] for path in glob.glob("src/*.py"),
     include_package_data=True,
@@ -43,6 +39,5 @@ setuptools.setup(
     install_requires=[
         "toolz >= 0.7.4",
     ],
-    entry_points='''
-        '''
+    entry_points={}
 )
