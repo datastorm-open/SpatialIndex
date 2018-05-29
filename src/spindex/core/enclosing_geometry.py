@@ -28,12 +28,23 @@ is the smallest bounding sphere (SBS). The latter exhibit a few
 advantages over AAMBR, and is also implemented in this module.
 '''
 import abc
+import pdb
+
 import numpy
+import shapely.geometry
+
 import spindex.externals.smallest_enclosing_circle as secircle
 
 
+# Dispatching bound_all to its class method
+def bound_all(bgeoms):
+    # Get the class of first value in bgeoms.
+    cls = type(next(iter(bgeoms)))
+    return cls.merge(bgeoms)
+
+
 class Enclosing_Geometry(abc.ABC):
-    """ 
+    """
     Abstract interface for bounding volume class.
 
     A bounding volume is a geometry enclosing entirely an underlying geometry.
@@ -41,13 +52,6 @@ class Enclosing_Geometry(abc.ABC):
     bounding sphere (SBS).
     """
     __slots__ = ()
-
-    @abc.abstractmethod
-    def intersects(self, other):
-        """
-        Returns True if `self` intersects the bounding volume `other`.
-        """
-        pass
 
     @classmethod
     @abc.abstractmethod
@@ -58,7 +62,14 @@ class Enclosing_Geometry(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def center(self):
+    def intersects(self, other):
+        """
+        Returns True if `self` intersects the bounding volume `other`.
+        """
+        pass
+
+    @abc.abstractmethod
+    def centroid(self):
         """Returns `self`'s barycenter."""
         pass
 
@@ -79,74 +90,55 @@ class Enclosing_Geometry(abc.ABC):
         pass
 
 
-class Rect(Enclosing_Geometry):
+class Rect(shapely.geometry.Polygon, Enclosing_Geometry):
     '''Axis-aligned minimum bounding rectangle.'''
-    __slots__ = ('minx', 'miny', 'maxx', 'maxy', 'buf')
-
     @staticmethod
     def merge(collection):
-        return Rect(min([r.minx for r in collection]),
-                    min([r.miny for r in collection]),
-                    max([r.maxx for r in collection]),
-                    max([r.maxy for r in collection]),
-                    )
+        arr = numpy.array([r.bounds for r in collection])
+        mins = arr[:, :2].min(0)
+        maxs = arr[:, 2:].max(0)
+        return Rect(*mins, *maxs)
 
-    def __init__(self, *args, buf=10**-6):
+    def __init__(self, *args):
         if not args:
-            self.minx = numpy.nan
-            self.miny = numpy.nan
-            self.maxx = numpy.nan
-            self.maxy = numpy.nan
+            minx = numpy.nan
+            miny = numpy.nan
+            minx = numpy.nan
+            maxy = numpy.nan
         elif len(args) == 1:
-            self.minx, self.miny, self.maxx, self.maxy = args[0].bounds
+            minx, miny, maxx, maxy = args[0]
         else:
-            self.minx = float(args[0])
-            self.miny = float(args[1])
-            self.maxx = float(args[2])
-            self.maxy = float(args[3])
-
-        self.minx -= buf
-        self.miny -= buf
-        self.maxx += buf
-        self.maxy += buf
-        self.buf = buf
+            minx, miny, maxx, maxy = args
+        super(Rect, self).__init__([(minx, miny), (maxx, miny),
+                                    (maxx, maxy), (minx, maxy),
+                                    (minx, miny)])
 
     def __repr__(self):
-        return "Rect(minx={}, miny={}, maxx={}, maxy={})".format(
-                    self.minx, self.miny, self.maxx, self.maxy)
-
-    def intersects(self, other):
-        minx = max(self.minx, other.minx)
-        miny = max(self.miny, other.miny)
-        maxx = min(self.maxx, other.maxx)
-        maxy = min(self.maxy, other.maxy)
-        if minx < maxx and miny < maxy:
-            return True  # Rect(minx, miny, maxx, maxy)
-        else:
-            return False  # Rect()
-
-    def center(self):
-        return [(self.minx + self.maxx)/2, (self.miny + self.maxy)/2]
+        return "Rect(minx={}, miny={}, maxx={}, maxy={})".format(*self.bounds)
 
     def mindist(self, to_other):
-        x = max(0, self.minx - to_other.maxx, to_other.minx - self.maxx) 
-        y = max(0, self.miny - to_other.maxy, to_other.miny - self.maxy) 
-        return numpy.sqrt(x**2+y**2)
+        return self.distance(to_other)
 
     def maxdist(self, to_other):
-        Xmaxmin = abs(self.maxx - to_other.minx)
-        Xmaxmax = abs(self.maxx - to_other.maxx)
-        Xminmin = abs(self.minx - to_other.minx)
-        Xminmax = abs(self.minx - to_other.maxx)
-        Ymaxmin = abs(self.maxy - to_other.miny)
-        Ymaxmax = abs(self.maxy - to_other.maxy)
-        Yminmin = abs(self.miny - to_other.miny)
-        Yminmax = abs(self.miny - to_other.maxy)
+        bthis = self.bounds
+        bthat = to_other.bounds
+        xmaxmin = abs(bthis[2] - bthat[0])
+        xmaxmax = abs(bthis[2] - bthat[2])
+        xminmin = abs(bthis[0] - bthat[0])
+        xminmax = abs(bthis[0] - bthat[2])
+        ymaxmin = abs(bthis[3] - bthat[1])
+        ymaxmax = abs(bthis[3] - bthat[3])
+        yminmin = abs(bthis[1] - bthat[1])
+        yminmax = abs(bthis[1] - bthat[3])
         return numpy.sqrt(min(
-            max(Xmaxmin, Xminmax)**2 + min(Ymaxmin, Ymaxmax, Yminmin, Yminmax)**2,
-            max(Ymaxmin, Yminmax)**2 + min(Xmaxmin, Xmaxmax, Xminmin, Xminmax)**2,
-            min(max(Ymaxmin, Ymaxmax), max(Yminmin, Yminmax))**2 + min(max(Xminmax, Xmaxmax), max(Xminmin, Xmaxmin))**2,
-            min(max(Xmaxmin, Xmaxmax), max(Xminmin, Xminmax))**2 + min(max(Yminmax, Ymaxmax), max(Yminmin, Ymaxmin))**2,
+            max(xmaxmin, xminmax)**2
+            + min(ymaxmin, ymaxmax, yminmin, yminmax)**2,
+            max(ymaxmin, yminmax)**2
+            + min(xmaxmin, xmaxmax, xminmin, xminmax)**2,
+            min(max(ymaxmin, ymaxmax), max(yminmin, yminmax))**2
+            + min(max(xminmax, xmaxmax), max(xminmin, xmaxmin))**2,
+            min(max(xmaxmin, xmaxmax), max(xminmin, xminmax))**2
+            + min(max(yminmax, ymaxmax), max(yminmin, ymaxmin))**2,
         ))
 
 

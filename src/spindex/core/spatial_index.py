@@ -18,156 +18,127 @@
 Spatial Index data structure and algorithms.
 
 The base data structure is the class :class:`IndexTree`.
-Different algorithms for building such a tree are provided via subclasses of 
+Different algorithms for building such a tree are provided via subclasses of
 :class:`IndexTree`.
 '''
-import time
-import collections
+import pdb
+import copy
 import heapq
-import toolz
+import time
+import warnings
+
 import sklearn.cluster
+import toolz
+
+import spindex.core.enclosing_geometry
+
+# ====================  BGH Data Structure  =============================
+
+# Tree structure: node with list of children
+# Node stores bounding geometries, possibly a node_obj and its children.
+# For internal node, children is a list of children trees.
+# For a leaf node, it is a mapping to bounding_geometries.
+# Implements state pattern with [empty, non-empty] states.
+# Implements visitor pattern
 
 
-# ====================  IndexTree Data Structure  =============================
+class BoundingGeometryTree():
+    """
+    Bounding Volumes Hierarchy data-structure.
 
-# The IndexTree pertains only to the data structure itself: definition,
-# iteration, and simple inserts. Since there are many algorithms to build an
-# IndexTree, they are separated from the data structure.
-#
-# The data model for the tree is given by the following specifications:
-#   1. Nodes are stored in a 1d-buffer indexed by non-negative integers.
-#   1. The root node has index 0.
-#   1. There are 2 types of nodes:
-#          a. internal nodes that have node children.
-#          a. leaf nodes that point to a buffer of leaf objects.
-#   1. A node contains at least a tuple of
-#          a. the index of its first child or of its leaf buffer.
-#          a. the index of its first sibling.
-#          a. a bool of whether it is a leaf node (set to false).
-#   1. A non-positive sibling index indicates that there is no sibling
-#      (should happen only for the root node).
-#   1. To each node corresponds an enclosing geometry containing all shapes
-#      associated to the node.
-#   1. The enclosing geometries are stored in a 1d-buffer parallel to the
-#      nodes.
-#   1. Leaf buffers contain a subcollection of keys to the shapes.
-#   1. Leaf buffers are stored in a 1d-buffer indexed by non-negative
-#      integers.
+    Abstract tree data-structure for bounding volumes hierarchies.  Each node
+    has a bounding geometry from :mod:`enclosing_geometry` and children. For
+    internal nodes, children is a list of children `BoundingGeometryTree`. For
+    leaf nodes, children is a mapping of bounding geometries.
 
-BaseNode = collections.namedtuple('BaseNode_', 'child sibling isleaf')
+    The class implements the state and visitor patterns. To add a visitor,
+    create a class with at least two methods: visit_empty and visit.
 
+    Attributes
+    ----------
+    bounds: bounding geometry
+    node_obj: object
+        Optional node object, e.g. centers.
+    children: list or mapping
+        List of children trees or leaf ids -> bounding geometry.
+    isleaf: boolean
+    """
+    __slots__ = ["bounds", "node_obj", "children", "isleaf"]
 
-class IndexTree():
-    """Data structure of a spatial index tree."""
-    def __init__(self, max_children=16, max_leaves=64):
-        self.max_children = max_children
-        self.max_leaves = max_leaves
-        self._clear()
-
-    def _clear(self):
-        self._enclose_class = None
-        self.node_count = 0
-        self.leaf_count = 0
-        self.nodes = []
-        self.preps = []
-        self.leaves = []
+    def __init__(self):
+        self.bounds = None
+        self.node_obj = None
+        self.children = None
+        self.isleaf = False
 
     @property
     def isempty(self):
-        return self.node_count == 0
+        '''Returns True if the tree is empty.'''
+        return self.bounds is None
 
-    def root(self):
+    # State: empty -> NonEmpty
+    def create_root(self, bgeom):
+        '''Change state from empty to non-empty tree. Creates the root node,
+        making its bounds equal to `bgeom`.'''
         if self.isempty:
-            raise ValueError("Index tree is empty")
-        return 0
+            self.bounds = bgeom
 
-    def siblings(self, idx=0):
-        node = self.nodes[idx]
-        for _ in range(self.max_children):
-            if node.sibling == 0:
-                return
-            yield node.sibling
-            node = self.nodes[node.sibling]
+    # State: NonEmpty -> empty
+    def delete(self):
+        '''Changes state from non-empty to empty tree. Resets attributes.'''
+        self.bounds = None
+        self.node_obj = None
+        self.children = None
+        self.isleaf = False
 
-    def children(self, idx=0):
-        node = self.nodes[idx]
-        if node.isleaf:
-            return
-        yield node.child
-        yield from self.siblings(node.child)
+    def insert_child(self, bgtree):
+        '''Insert the single child `bgtree`.'''
+        self.children.append(bgtree)
 
-    def leaf(self, idx=0):
-        leaf = self.leaves[idx]
-        yield from leaf.items()
-
-    def insert_node(self, node, prep):
-        self.nodes.append(node)
-        self.preps.append(prep)
-        self.node_count += 1
-
-    def insert_leaf(self, pgeoms):
-        self.leaves.append(pgeoms)
-        self.leaf_count += 1
-
-    def approx_intersects(self, prep, idx=0):
-        node = self.nodes[idx]
-        if not prep.intersects(self.preps[idx]):
-            return
-        if node.isleaf:
-            yield from (idx for idx, oprep in self.leaf(node.child)
-                        if prep.intersects(oprep))
+    def delete_child(self, idx=-1):
+        '''Removes the child at position `idx`.'''
+        if self.isempty or self.isleaf:
+            warnings.warn("Cannot delete child from a leaf or empty tree. "
+                          "No action taken.")
         else:
-            for child in self.children(node):
-                yield from self.approx_intersects(prep, child)
+            del self.children[idx]
+            if len(self.children) == 0:
+                self.children = None
+                self.isleaf = True
 
-    def approx_nearest(self, refprep, idx=0):
+    def accept(self, visitor, *args, **kwargs):
+        '''Accept `visitor` to operate on the structure.'''
         if self.isempty:
-            return
-
-        INT_NODE = 0
-        LEAF_NODE = 1
-        LEAF_OBJ = 2
-
-        nodes_heap = []
-        typ = int(self.nodes[idx].isleaf)
-        prep = self.preps[idx]
-        heapq.heappush(nodes_heap, (refprep.mindist(prep), idx, typ))
-
-        # Iterate through the tree starting with the heap's min element.
-        while nodes_heap:
-            mindist, idx, typ = heapq.heappop(nodes_heap)
-            if typ == INT_NODE:
-                node = self.nodes[idx]
-                for child in self.children(idx):
-                    prep = self.preps[child]
-                    heapq.heappush(nodes_heap, (refprep.mindist(prep), child,
-                                                int(self.nodes[child].isleaf)))
-            elif typ == LEAF_NODE:  # Leaf node. Push the leaves on heap.
-                node = self.nodes[idx]
-                for idx, prep in self.leaf(node.child):
-                    heapq.heappush(nodes_heap,
-                                   (refprep.mindist(prep), idx, LEAF_OBJ))
-            elif typ == LEAF_OBJ:  # RepGeom. Push shape on heap.
-                yield (idx, mindist)
-            else:
-                raise IndexError("Node type not recognized")
+            return visitor.visit_empty(self, *args, **kwargs)
+        else:
+            return visitor.visit(self, *args, **kwargs)
 
 
-# =========================  Divisive KMeans  =================================
-
-# Divisive KMeans builds an IndexTree based on divisive hierarchical clustering
-# via Kmeans clustering at each level.
+# ====================  BGH Builders  =============================
 
 
-class DKMeans(IndexTree):
-    """Index based on Divisive Hierarchical Clustering via KMeans."""
-    
-    # Node extends BaseNode
-    Node = collections.namedtuple("Node", ' '.join(BaseNode._fields)
-                                          + ' centroid_x centroid_y')
+class DKMeansBulkInsert():
+    '''
+    Divisive KMeans BGH-builder.
+
+    DKMeansBulkInsert is a top-down hierarchical clustering. Division is done
+    via KMeans clustering.
+
+    Attributes
+    ----------
+    max_children: int
+        Max number of children for internal node.
+    max_leaves: int
+        Max number of leaves in a left object.
+    n_jobs: int
+        Number of jobs to run in parallel.
+    '''
+    def __init__(self, max_children=16, max_leaves=64, n_jobs=1):
+        self.max_children = max_children
+        self.max_leaves = max_leaves
+        self.n_jobs = n_jobs
 
     @staticmethod
-    # KMeans clustering algorithm, here via scikit-learn
     def _cluster(rgeoms, n_clusters=16, n_init=3, n_jobs=1):
         cluster_model = sklearn.cluster.KMeans(
             n_clusters=n_clusters,
@@ -175,100 +146,120 @@ class DKMeans(IndexTree):
             n_init=n_init,
             n_jobs=n_jobs,
         )
-        centers = [g.center() for _, g in rgeoms.items()]
-        t1 = time.perf_counter()
+        centers = [tuple(g.centroid.coords)[0] for _, g in rgeoms.items()]
         fitted = cluster_model.fit(centers)
-        t2 = time.perf_counter()
         clust = {k: v for k, v in zip(rgeoms.keys(), fitted.labels_)}
         return (clust, fitted.cluster_centers_)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._stats = {
-            "kmeans_time": 0.,
-            "mean_relative_overlap": 0.,
-            "number_nodes_visited": 0,
-            "number_overflows": 0,
-            "max_depth": 0,
-            "number_nodes": 0,
-            "number_leaves": 0,
-        }
-
-    def bulk_update(self, pgeoms, n_jobs=1):
-        '''Create the whole index based on `geoms`.'''
-        if len(pgeoms) == 0:
-            return
-        if not self.isempty:
-            raise NotImplementedError("Updates on non-empty Index Tree are "
-                                      "not yet implemented")
-        self._enclose_class = type(pgeoms[0])
-        root = self.Node(0, 0, 0, 0., 0.)
-        self.insert_node(root, self._enclose_class.merge(pgeoms.values()))
-        self._build(pgeoms, 0, n_jobs)
-
-    def _build(self, pgeoms, idx, n_jobs=1):
-        '''Builds rectangles `pgeoms` into node indexed `idx`.'''
-        if len(pgeoms) <= self.max_leaves:
-            # Update node so that it is pointing to leaf.
-            self.nodes[idx] = self.nodes[idx]._replace(
-                child=self.leaf_count, isleaf=1)
-            self.insert_leaf(pgeoms)
-        else:
-            clust, centers = self._cluster(pgeoms,
-                                           n_clusters=self.max_children)
-            # Groupby the geometries by cluster.
-            # We ensure the order of groups by casting to OrderedDict
-            groups = collections.OrderedDict(
-                toolz.valmap(collections.OrderedDict, 
-                             toolz.groupby(lambda x: clust[x[0]],
-                                           pgeoms.items())
-                             )
-            )
-            # Parallel or not
-            if n_jobs == 1:
-                # Create children and update parent node.
-                self.nodes[idx] = self.nodes[idx]._replace(
-                    child=self.node_count,)
-                old_count = self.node_count
-                for e, (i, grp) in enumerate(groups.items()):
-                    if e + 1 >= self.max_children:  # last child
-                        new_node = self.Node(0, 0, 0, *centers[i])
-                    else:
-                        new_node = self.Node(0, self.node_count+1, 0,
-                                             *centers[i])
-                    self.insert_node(new_node,
-                                     self._enclose_class.merge(grp.values())
-                                     )
-                for e, grp in enumerate(groups.values()):
-                    self._build(grp, old_count + e, n_jobs=1)
-            else:
-                # Bugs in the parallel version, probably in merging trees.
-                import multiprocessing
-                import dill as pickle
-                with multiprocessing.Pool(n_jobs) as pool:
-                    child_trees = pool.map(self._index_task,
-                                           [g for _, g in groups])
-                self.merge(child_trees)
-
-    def _index_task(self, rgeoms):
-        '''Builds a sub-ClustTree for parallel computation.'''
-        tree = ClustTree(self.rcls, self.max_children, self.max_leaves,
-                         self.n_init, 1)
-        tree.index(rgeoms)
+    # For parallelization purposes
+    def _index_task(self, bgeoms):
+        visitor = copy.copy(self)
+        visitor.n_jobs = 1
+        tree = BoundingGeometryTree()
+        tree.accept(visitor, bgeoms)
         return tree
 
-    def _merge(self, trees):
-        '''Merge trees under a root node.'''
-        for tree in trees:
-            # increment indices for nodes and leaves.
-            for idx in range(tree.node_count):
-                node = tree.nodes.read(idx)
-                if node.isleaf:
-                    self.nodes.extend(
-                        [node.child + self.leaf_count, node.sibling + self.node_count, node.leaf])
+    def visit_empty(self, bgtree, bgeoms):
+        bvalues = [b for _, b in bgeoms.items()]
+        bgtree.create_root(spindex.core.enclosing_geometry.bound_all(bvalues))
+        # insert_node_obj for root?
+        accept_stack = [(bgtree, bgeoms)]
+        while len(accept_stack) > 0:
+            tree, bound_geos = accept_stack.pop(0)
+            if len(bound_geos) <= self.max_leaves:
+                tree.children = bound_geos
+                tree.isleaf = True
+            else:
+                tree.children = []
+                clust, centers = self._cluster(bound_geos,
+                                               n_clusters=self.max_children)
+                # Groupby the geometries by cluster.
+                groups = toolz.valmap(
+                    dict,
+                    toolz.groupby(lambda x: clust[x[0]], bound_geos.items())
+                )
+                # Parallel or not
+                if self.n_jobs == 1:
+                    for clust_id, grp in groups.items():
+                        bvalues = [b for _, b in grp.items()]
+                        bgeom = spindex.core.enclosing_geometry.bound_all(
+                            bvalues)
+                        child_tree = BoundingGeometryTree()
+                        child_tree.bounds = bgeom
+                        child_tree.node_obj = centers[clust_id]
+                        tree.insert_child(child_tree)
+                        accept_stack.append((child_tree, grp))
                 else:
-                    self.nodes.extend([node.child + self.node_count, node.sibling + self.node_count, node.leaf])
-            self.node_count += tree.node_count    
-            self.leaf_count += tree.leaf_count
-            self.reps.extend(tree.reps.pool)
-            self.centroids.extend(tree.centroids.pool)
+                    import multiprocessing
+                    with multiprocessing.Pool(self.n_jobs) as pool:
+                        child_trees = pool.map(
+                            self._index_task,
+                            [g for _, g in groups.items()]
+                        )
+                    bgtree.children = child_trees
+
+    def visit(bgtree, bgeoms):
+        # bulk update
+        raise NotImplementedError
+
+
+# ====================  Visitors  =============================
+# Visitor not in the sense of visitor pattern, but in the sense of visiting the
+# data-structure.
+
+
+class ApproxNearest():
+    '''
+    Approximate nearest neighbours generator BoundingGeometryTree visitor.
+    '''
+    def visit_empty(self, bgtree, bgeom):
+        return
+
+    def visit(self, bgtree, bgeom):
+        nodes_heap = [(bgeom.mindist(bgtree.bounds), bgtree)]
+        # Iterate through the tree starting with the heap's min element.
+        while nodes_heap:
+            mindist, node = heapq.heappop(nodes_heap)
+            if isinstance(node, BoundingGeometryTree) and not node.isleaf:
+                for child in node.children:
+                    heapq.heappush(nodes_heap,
+                                   (bgeom.mindist(child.bounds), child))
+            elif isinstance(node, BoundingGeometryTree) and node.isleaf:
+                for idx, obj in node.children.items():
+                    heapq.heappush(nodes_heap, (bgeom.mindist(obj), idx))
+            else:
+                yield (node, mindist)
+
+
+class Intersection():
+    """
+    Predicate based-query BoundingGeometryTree visitor.
+
+    Attributes
+    ----------
+    op: one of ['within', 'contains', 'intersects']
+        Which predicate to use for the query.    
+    """
+    def __init__(self, op='intersects'):
+        self.op=op
+
+    def visit_empty(self, bgtree, bgeom):
+        return
+
+    def visit(self, bgtree, bgeom):
+        predicate = (
+            bgeom.within if self.op == 'within' else
+            bgeom.contains if self.op == 'contains' else
+            bgeom.intersects
+        )
+        node_stack = [bgtree]
+        while len(node_stack) > 0:
+            tree = node_stack.pop(0)
+            if not predicate(tree.bounds):
+                continue
+            if tree.isleaf:
+                for i, obj in tree.children.items():
+                    if predicate(obj):
+                        yield i
+            else:
+                node_stack.extend(tree.children)

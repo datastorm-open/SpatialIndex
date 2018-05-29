@@ -17,15 +17,65 @@
 '''
 Spatial joins using indexing.
 '''
-import toolz
-import warnings
-import multiprocessing
+import pdb
 import heapq
-import spindex.core.enclosing_geometry as prepared
+import multiprocessing
+
+import numpy
+import toolz
+
+import spindex.core.enclosing_geometry
+import spindex.core.spatial_index
 
 
 HOW_ARGLIST = ['left']
 OP_ARGLIST = ['knn', 'max_intersection']
+
+
+def nearest(geom, right, right_sindex, n_neighbours=1):
+    visitor = spindex.core.spatial_index.ApproxNearest()
+    bgeom = spindex.core.enclosing_geometry.Rect(geom.bounds)
+    candidates = right_sindex.accept(visitor, bgeom)
+
+    # Initialise the heap with n_neighbours elements
+    heap = list(map(lambda x: (-geom.distance(right[x[0]]), x[0]),
+                    [next(candidates) for _ in range(n_neighbours)]))
+
+    # Keep only best n_neighbours elements until mindist is too high.
+    for idx, mindist in candidates:
+        if mindist >= -heap[0][0]:
+            break
+        dist = geom.distance(right[idx])
+        heapq.heappushpop(heap, (-dist, idx))
+
+    # Return the sorted best neighbours.
+    sorted_heap = [heapq.heappop(heap) for _ in range(len(heap))][::-1]
+    return [(i, -d) for d, i in sorted_heap]
+
+
+def nearest_join(left, right, n_neighbours=1, n_jobs=1, chunk_size=1000):
+    bgeoms = {idx: spindex.core.enclosing_geometry.Rect(geom.bounds)
+              for idx, geom in right.items()}
+    right_sindex = spindex.core.spatial_index.BoundingGeometryTree()
+    right_sindex.accept(
+        spindex.core.spatial_index.DKMeansBulkInsert(n_jobs=n_jobs), bgeoms)
+    if n_jobs == 1:
+        res = _nearest_task(left, right, right_sindex,
+                            n_neighbours=n_neighbours)
+    else:
+        chunks = [toolz.partition_all(chunk_size, left.items())]
+        task = toolz.partial(_nearest_task, right=right,
+                             n_neighbours=n_neighbours,
+                             right_sindex=right_sindex)
+        with multiprocessing.Pool(n_jobs) as pool:
+            res = pool.map(task, chunks)
+    return numpy.array(res).reshape(-1, 3)
+
+
+def _nearest_task(left, right, right_sindex, n_neighbours=1):
+    return [(idx, jdx, dist) for idx, geom in left.items()
+            for jdx, dist in nearest(geom, right, right_sindex,
+                                     n_neighbours=n_neighbours)]
 
 
 # Interface function: interprete arguments and delegate appropriately
