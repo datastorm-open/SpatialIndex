@@ -33,7 +33,7 @@ HOW_ARGLIST = ['left']
 OP_ARGLIST = ['knn', 'max_intersection']
 
 
-def prepare_geoms(geoms, n_jobs=1):
+def prepare_geoms(geoms, n_jobs=1, chunk_size=10000):
     '''TODO'''
     bgeoms = {idx: spindex.core.enclosing_geometry.Rect(geom.bounds)
               for idx, geom in geoms.items()}
@@ -64,7 +64,7 @@ def nearest(geom, right, right_sindex, n_neighbours=1):
     return [(i, -d) for d, i in sorted_heap]
 
 
-def nearest_join(left, right, n_neighbours=1, n_jobs=1, chunk_size=1000):
+def nearest_join(left, right, n_neighbours=1, n_jobs=1, chunk_size=10000):
     bgeoms, right_sindex = prepare_geoms(right, n_jobs)
     if n_jobs == 1:
         res = _nearest_task(left, right, right_sindex,
@@ -76,7 +76,9 @@ def nearest_join(left, right, n_neighbours=1, n_jobs=1, chunk_size=1000):
                              right_sindex=right_sindex)
         with multiprocessing.Pool(n_jobs) as pool:
             res = pool.map(task, chunks)
-    return numpy.array(res).reshape(-1, 3)
+            res = [y for x in res for y in x]
+    return res
+    # return numpy.array(res).reshape(-1, 3)
 
 
 def _nearest_task(left, right, right_sindex, n_neighbours=1):
@@ -85,7 +87,7 @@ def _nearest_task(left, right, right_sindex, n_neighbours=1):
                                      n_neighbours=n_neighbours)]
 
 
-def max_intersection(geom, right, right_sindex, n_neighbours=1):
+def max_intersection(geom, right, right_sindex):
     visitor = spindex.core.spatial_index.Intersection(op='intersects')
     bgeom = spindex.core.enclosing_geometry.Rect(geom.bounds)
     candidates = right_sindex.accept(visitor, bgeom)
@@ -97,6 +99,8 @@ def max_intersection(geom, right, right_sindex, n_neighbours=1):
                     for x in candidates]
     else:
         raise ValueError("geometry type %s is not supported" % geom.type)
+    if len(measures) == 0:
+        return []
     length, _ = max(measures)
     return [(x, l) for l, x in measures if math.isclose(l, length)]
 
@@ -111,7 +115,9 @@ def max_intersection_join(left, right, n_jobs=1, chunk_size=1000):
                              right_sindex=right_sindex)
         with multiprocessing.Pool(n_jobs) as pool:
             res = pool.map(task, chunks)
-    return numpy.array(res).reshape(-1, 3)
+            res = [y for x in res for y in x]
+    return res
+#    return numpy.array(res).reshape(-1, 3)
 
 
 def _max_intersection_task(left, right, right_sindex):
