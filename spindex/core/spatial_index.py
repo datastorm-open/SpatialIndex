@@ -135,13 +135,13 @@ class DKMeansBulkInsert():
     n_jobs: int
         Number of jobs to run in parallel.
     '''
-    def __init__(self, max_children=16, max_leaves=64, n_jobs=1):
+    def __init__(self, max_children=6, max_leaves=64, n_jobs=1):
         self.max_children = max_children
         self.max_leaves = max_leaves
         self.n_jobs = n_jobs
 
     @staticmethod
-    def _cluster(rgeoms, n_clusters=16, n_init=3, n_jobs=1):
+    def _cluster(rgeoms, n_clusters=6, n_init=3, n_jobs=1):
         cluster_model = sklearn.cluster.KMeans(
             n_clusters=n_clusters,
             random_state=0,
@@ -214,23 +214,33 @@ class ApproxNearest():
     '''
     Approximate nearest neighbours generator BoundingGeometryTree visitor.
     '''
-    def visit_empty(self, bgtree, bgeom):
+    @staticmethod
+    def visit_empty(bgtree, bgeom):
         return
 
-    def visit(self, bgtree, bgeom):
-        nodes_heap = [(bgeom.mindist(bgtree.bounds), bgtree)]
+    @staticmethod
+    def visit(bgtree, bgeom):
+        nodes_ref = [bgtree]
+        n_nodes = 1
+        nodes_heap = [(bgeom.mindist(bgtree.bounds), 0, True)]
         # Iterate through the tree starting with the heap's min element.
         while nodes_heap:
-            mindist, node = heapq.heappop(nodes_heap)
-            if isinstance(node, BoundingGeometryTree) and not node.isleaf:
+            mindist, idx, is_node = heapq.heappop(nodes_heap)
+            node = nodes_ref[idx] if is_node else None
+            if is_node and not node.isleaf:
                 for child in node.children:
-                    heapq.heappush(nodes_heap,
-                                   (bgeom.mindist(child.bounds), child))
-            elif isinstance(node, BoundingGeometryTree) and node.isleaf:
+                    heapq.heappush(
+                        nodes_heap,
+                        (bgeom.mindist(child.bounds), n_nodes, True)
+                    )
+                    nodes_ref.append(child)
+                    n_nodes += 1
+            elif is_node and node.isleaf:
                 for idx, obj in node.children.items():
-                    heapq.heappush(nodes_heap, (bgeom.mindist(obj), idx))
+                    heapq.heappush(nodes_heap,
+                                   (bgeom.mindist(obj), idx, False))
             else:
-                yield (node, mindist)
+                yield (idx, mindist)
 
 
 class Intersection():

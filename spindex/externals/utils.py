@@ -7,6 +7,7 @@ import toolz
 # Add checks for n_jobs and chunk_size in arguments to fnc.
 # Possibly use parameters[key].kind to get the kind of param.
 # Using name(s) to pmap on which variables. By default, None means first arg.
+# Option to return a list or a mapping?
 
 def pmap(fnc, n_jobs=1, chunk_size=10000):
     @functools.wraps(fnc)

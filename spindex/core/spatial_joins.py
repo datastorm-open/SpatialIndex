@@ -49,9 +49,11 @@ def nearest(geom, right, right_sindex, n_neighbours=1):
     candidates = right_sindex.accept(visitor, bgeom)
 
     # Initialise the heap with n_neighbours elements
-    heap = list(map(lambda x: (-geom.distance(right[x[0]]), x[0]),
-                    [next(candidates) for _ in range(n_neighbours)]))
-
+    heap = []
+    for _ in range(n_neighbours):
+        idx, mindist = next(candidates)
+        dist = geom.distance(right[idx])
+        heapq.heappush(heap, (-dist, idx))
     # Keep only best n_neighbours elements until mindist is too high.
     for idx, mindist in candidates:
         if mindist >= -heap[0][0]:
@@ -64,16 +66,18 @@ def nearest(geom, right, right_sindex, n_neighbours=1):
     return [(i, -d) for d, i in sorted_heap]
 
 
-def nearest_join(left, right, n_neighbours=1, n_jobs=1, chunk_size=10000):
-    bgeoms, right_sindex = prepare_geoms(right, n_jobs)
+def nearest_join(left, right, n_neighbours=1, sindex=None,
+                 n_jobs=1, chunk_size=10000):
+    if sindex is None:
+        _, sindex = prepare_geoms(right, n_jobs)
     if n_jobs == 1:
-        res = _nearest_task(left, right, right_sindex,
+        res = _nearest_task(left.items(), right, sindex,
                             n_neighbours=n_neighbours)
     else:
-        chunks = [toolz.partition_all(chunk_size, left.items())]
+        chunks = list(toolz.partition_all(chunk_size, left.items()))
         task = toolz.partial(_nearest_task, right=right,
                              n_neighbours=n_neighbours,
-                             right_sindex=right_sindex)
+                             right_sindex=sindex)
         with multiprocessing.Pool(n_jobs) as pool:
             res = pool.map(task, chunks)
             res = [y for x in res for y in x]
@@ -82,7 +86,7 @@ def nearest_join(left, right, n_neighbours=1, n_jobs=1, chunk_size=10000):
 
 
 def _nearest_task(left, right, right_sindex, n_neighbours=1):
-    return [(idx, jdx, dist) for idx, geom in left.items()
+    return [(idx, jdx, dist) for idx, geom in left
             for jdx, dist in nearest(geom, right, right_sindex,
                                      n_neighbours=n_neighbours)]
 
@@ -100,19 +104,23 @@ def max_intersection(geom, right, right_sindex):
     else:
         raise ValueError("geometry type %s is not supported" % geom.type)
     if len(measures) == 0:
-        return []
+        return [(None, numpy.nan)]
     length, _ = max(measures)
+    if math.isclose(length, 0.):
+        return [(None, numpy.nan)]
     return [(x, l) for l, x in measures if math.isclose(l, length)]
 
 
-def max_intersection_join(left, right, n_jobs=1, chunk_size=1000):
-    bgeoms, right_sindex = prepare_geoms(right, n_jobs)
+def max_intersection_join(left, right, sindex=None,
+                          n_jobs=1, chunk_size=10000):
+    if sindex is None:
+        _, sindex = prepare_geoms(right, n_jobs)
     if n_jobs == 1:
-        res = _max_intersection_task(left, right, right_sindex)
+        res = _max_intersection_task(left.items(), right, sindex)
     else:
-        chunks = [toolz.partition_all(chunk_size, left.items())]
+        chunks = list(toolz.partition_all(chunk_size, left.items()))
         task = toolz.partial(_max_intersection_task, right=right,
-                             right_sindex=right_sindex)
+                             right_sindex=sindex)
         with multiprocessing.Pool(n_jobs) as pool:
             res = pool.map(task, chunks)
             res = [y for x in res for y in x]
@@ -121,5 +129,5 @@ def max_intersection_join(left, right, n_jobs=1, chunk_size=1000):
 
 
 def _max_intersection_task(left, right, right_sindex):
-    return [(idx, jdx, measure) for idx, geom in left.items()
+    return [(idx, jdx, measure) for idx, geom in left
             for jdx, measure in max_intersection(geom, right, right_sindex)]

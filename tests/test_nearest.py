@@ -78,8 +78,7 @@ def test_core_join_one_neighbour(left_df, right_df):
     res = sjoin.nearest_join(l_geom, r_geom)
     pres = [(i, j, d) for i, l in left_df.geometry.items()
             for j, d in pairwise_query(l, right_df)[:1]]
-
-    assert all([all(r == p) for r, p in zip(res, pres)])
+    assert all([r == p for r, p in zip(res, pres)])
 
 
 # def test_core_join_one_neighbour(left_df, right_df):

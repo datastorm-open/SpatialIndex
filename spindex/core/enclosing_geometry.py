@@ -101,11 +101,9 @@ class Rect(shapely.geometry.Polygon, Enclosing_Geometry):
 
     def __init__(self, *args):
         if not args:
-            minx = numpy.nan
-            miny = numpy.nan
-            minx = numpy.nan
-            maxy = numpy.nan
-        elif len(args) == 1:
+            super(Rect, self).__init__()
+            return
+        if len(args) == 1:
             minx, miny, maxx, maxy = args[0]
         else:
             minx, miny, maxx, maxy = args
