@@ -85,11 +85,11 @@ def sort_tile_recurse(egeoms, page_size=16, max_top_size=1):
 
     # Initialise the leaves
     envel = [egeoms]
-    children = [numpy.ma.array(numpy.arange(len(egeoms)).reshape(-1, 1))]
+    children = [numpy.ma.arange(len(egeoms)).reshape(-1, 1)]
     while len(envel[-1]) > max_top_size:
         children.append(sort_tile(coords=envel[-1].centers))
         envel.append(envel[-1].mergeby(children[-1]))
-    return tree.RTree(envel[::-1], children[::-1])
+    return tree.BVH(envel[::-1], children[::-1])
 
 
 if __name__ == "__main__":

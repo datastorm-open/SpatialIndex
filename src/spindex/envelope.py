@@ -31,15 +31,56 @@ class AAMBRVect(EnvelopeVect):
     def centers(self):
         return 0.5 * (self.mins + self.maxs)
 
-    def intersects(self, other):
+    def check_dims(self, other):
         if self.ndims != other.ndims:
             raise ValueError(
                 "Incompatible number of dimensions {} and {} in {}.intersects."
                 .format(self.ndims, other.ndims, self.__class__)
             )
-        xshape = (len(self), 1, self.ndims)
-        yshape = (1, len(other), other.ndims)
+
+    def _dist_by_dims(self, other):
+        self_shape = (len(self), 1, self.ndims)
+        other_shape = (1, len(other), other.ndims)
+        dist = numpy.concatenate([
+            numpy.abs(self.mins.reshape(self_shape)
+                      - other.maxs.reshape(other_shape))[numpy.newaxis, ...],
+            numpy.abs(self.maxs.reshape(self_shape)
+                      - other.mins.reshape(other_shape))[numpy.newaxis, ...],
+        ])
+        return dist
+
+    def distance(self, other):
+        self.check_dims(other)
+        dist = self._dist_by_dims(other).min(axis=0)
+        dist[self._intersects_by_dims(other)] = 0.
+        return numpy.sqrt((dist**2).sum(axis=2))
+
+    def maxmindist(self, other):
+        self.check_dims(other)
+        dist = self._dist_by_dims(other).max(axis=0)
+        return numpy.sqrt((dist**2).sum(axis=2))
+
+    def bound_dist(self, other):
+        """
+        Perform both distance and maxmindist in a slightly more efficient way.
+        """
+        self.check_dims(other)
+        dist = self._dist_by_dims(other)
+        mindist = dist.min(axis=0)
+        mindist[self._intersects_by_dims(other)] = 0.
+        return (numpy.sqrt((mindist**2).sum(axis=2)),
+                numpy.sqrt((dist.max(axis=0)**2).sum(axis=2)), )
+
+    def _intersects_by_dims(self, other):
+        # Uses broadcasting to vectorize comparisons between all pairs of self
+        # and other
+        self_shape = (len(self), 1, self.ndims)
+        other_shape = (1, len(other), other.ndims)
         return (
-            (self.mins.reshape(xshape) < other.maxs.reshape(yshape))
-            & (self.maxs.reshape(xshape) > other.mins.reshape(yshape))
-        ).all(axis=2)
+            (self.mins.reshape(self_shape) < other.maxs.reshape(other_shape))
+            & (self.maxs.reshape(self_shape) > other.mins.reshape(other_shape))
+        )
+
+    def intersects(self, other):
+        self.check_dims(other)
+        return self._intersects_by_dims(other).all(axis=2)

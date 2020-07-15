@@ -1,13 +1,29 @@
+"""
+TODO
+"""
 import collections
 
 import numpy
 
 
-class RTree():
+class BVH():
     """
-    Highly efficient R-Tree structure using arrays.
+    Highly efficient R-Tree-like structure using arrays.
 
-    Arrays are used instead of the classically doubly linked list of siblings at a tree levels.
+    The structure of a BVH is like a R-Tree, but the initial level is not
+    constrained to contain a single node (the root). Instead, it could be
+    cut-off at the higher levels, leading to a balanced forest instead.
+
+    A more important difference comparing to a R-Tree is that arrays are used
+    instead of the classically doubly linked list of siblings at each level.
+
+    Note:
+        The name BVH stands for Bounding Volume Hierarchy, which is both more
+        descriptive and general than R-Tree. The name comes from collision
+        detection in computer graphics. In a bounding volume hierarchy, the
+        bounding geometries (a.k.a envelopes) need not be axis-aligned
+        rectangles, nor even rectangles at all. We also add that a hierarchy
+        need not be a single tree.
 
     Args:
         envelopes: value of the envelopes attribute.
@@ -27,69 +43,125 @@ class RTree():
         self.children = children
 
     @property
+    def width(self):
+        """Number of nodes at top level."""
+        if self.is_empty:
+            return 0
+        return len(self.envelopes[0])
+
+    @property
     def depth(self):
+        """Depth of the tree."""
         return len(self.envelopes)
 
     @property
     def is_empty(self):
+        """Boolean: Is the tree empty?"""
         return self.depth == 0
 
     def __len__(self):
         """Returns the number of leaves."""
         return len(self.envelopes[-1])
 
-    def query(self, obj, op, sparse=False):
+    def search(self, obj, search_func, sparse=False):
         """
-        Bulk search query with given relationship.
-
-        Parameters:
-            obj (EnvelopeVect): query objects
-            predicate (str): One of {}
-        """.format(self.valid_predicates)
-        empty_result = numpy.array([], dtype='int')
-        if self.is_empty:
-            return [empty_result for _ in range(len(obj))]
-        if op not in self.valid_predicates:
-            raise ValueError(
-                "Invalid predicate {}: must be one of {}"
-                .format(op, self.valid_predicates)
-            )
-
-        # Cascading through tree levels to get matching indexes.
-        # Path corresponds to a search path consisting of indexes in both self
-        #   and obj.
-        Path = collections.namedtuple("QueryResult", "this that")
-        paths = [Path(this=numpy.arange(len(self.envelopes[0])),
-                      that=numpy.arange(len(obj)))]
-        for envelopes, children in zip(self.envelopes, self.children):
+        Bulk search query with given predicate function.
+        """
+        # Cascading through levels to get matching indexes.
+        paths = [QueryPath(
+            query=numpy.arange(len(obj)),
+            target=numpy.arange(self.width),
+        )]
+        for envel, children in zip(self.envelopes, self.children):
             next_paths = []
             for path in paths:
-                pred = getattr(obj[path.that], op)(envelopes[path.this])
-                # Numpy style groupby pred's rows -> list of index arrays
-                hashes = numpy.apply_along_axis(lambda a: a.tobytes(), 1, pred)
-                arg = numpy.argsort(hashes)
-                _, ind = numpy.unique(hashes[arg], return_index=True)
-                groups = numpy.split(arg, ind[1:])
-                # Each group corresponds to a search path
+                pred = search_func(obj[path.query], envel[path.target])
                 next_paths.extend([
-                    Path(this=children[path.this, :][pred[g[0], :]]
-                         .compressed(),
-                         that=path.that[g])
-                    for g in groups
+                    QueryPath(
+                        query=path.query[grp],
+                        target=(
+                            children[path.target[pred[grp[0], :]], :]
+                            .compressed()
+                        ),
+                    ) for grp in groupby(pred, axis=1)
                 ])
-                # next_paths.extend([
-                #     Path(this=numpy.concatenate(
-                #             [child for child, p in zip(children, pred[g[0], :])
-                #              if p]),
-                #          that=path.that[g])
-                #     for g in groups
-                # ])
             paths = next_paths
         if sparse:
             return paths
-        # Resulting valid paths are reordered in original obj order.
-        result = [empty_result]*len(obj)
-        for path in paths:
-            for i in path.that:
-                result[i] = path.this
-        return result
+        return _sparse_to_full(paths, len(obj))
+
+    def query(self, obj, predicate, sparse=False):
+        """
+        Args:
+            obj (EnvelopeVect): query objects
+            predicate (str): One of {}
+            sparse (bool, optional): If True, returns a sparser representation
+                of the resulting indexes. Defaults to False.
+
+        Returns:
+            If sparse is False, returns a list with an array of matching
+            indices for each element of obj.
+            If spare is True, returns a list of 2-tuples of arrays of matching
+            indices.
+        """.format(self.valid_predicates)
+        if predicate not in self.valid_predicates:
+            raise ValueError(
+                "Invalid predicate {}: must be one of {}"
+                .format(predicate, self.valid_predicates)
+            )
+
+        def search_func(obj, envel):
+            return getattr(obj, predicate)(envel)
+
+        return self.search(obj, search_func, sparse)
+
+    def nearest(self, obj, knn=1, sparse=False):
+        """
+        TODO
+        """
+        def search_func(obj, envel):
+            lower_bounds, upper_bounds = obj.bound_dist(envel)
+            if upper_bounds.shape[1] <= knn:
+                kth_upper_bounds = upper_bounds.max(axis=1)
+            else:
+                kth_upper_bounds = numpy.apply_along_axis(
+                    lambda arr: numpy.partition(arr.flatten(), kth=knn)[knn],
+                    axis=1,
+                    arr=upper_bounds,
+                )
+            return (lower_bounds.T <= kth_upper_bounds).T  # Bdcast on 1st dim
+
+        return self.search(obj, search_func, sparse)
+
+
+QueryPath = collections.namedtuple("QueryPath", "query target")
+# Path corresponds to a search path consisting of indexes in both query and
+# target geoms
+
+
+def _sparse_to_full(paths, length):
+    # Resulting valid paths are reordered in original obj order.
+    result = [None]*length
+    for path in paths:
+        for i in path.query:
+            result[i] = path.target
+    return result
+
+
+def groupby(arr, axis=1):
+    """
+    Groupby array on values along axis _axis_.
+
+    The operation uses the hash method _tobytes()_ to quickly compare elements.
+
+    Args:
+        arr (array): Array to group by values on an axis.
+        axis (int, optional): Axis along which to group values.
+            Defaults to 1.
+    """
+    # Hash values using tobytes(), sort them, and performs a unix groupby
+    # (via the uniq command)
+    hashes = numpy.apply_along_axis(lambda a: a.tobytes(), axis, arr)
+    arg = numpy.argsort(hashes)
+    _, ind = numpy.unique(hashes[arg], return_index=True)
+    return numpy.split(arg, ind[1:])
