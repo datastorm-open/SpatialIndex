@@ -1,6 +1,8 @@
 """
 TODO
 """
+import pdb
+
 import collections
 
 import numpy
@@ -65,32 +67,44 @@ class BVH():
 
     def search(self, obj, search_func, sparse=False):
         """
-        Bulk search query with given predicate function.
+        Bulk branch-and-bound search query with given predicate function.
         """
         # Cascading through levels to get matching indexes.
         paths = [QueryPath(
             query=numpy.arange(len(obj)),
             target=numpy.arange(self.width),
         )]
+        empty_paths = []
         for envel, children in zip(self.envelopes, self.children):
             next_paths = []
             for path in paths:
                 pred = search_func(obj[path.query], envel[path.target])
-                next_paths.extend([
-                    QueryPath(
-                        query=path.query[grp],
-                        target=(
-                            children[path.target[pred[grp[0], :]], :]
-                            .compressed()
-                        ),
-                    ) for grp in groupby(pred, axis=1)
-                ])
+                # Early stopping for non-matching query geometries
+                is_nonempty = pred.any(axis=1)
+                pred = pred[is_nonempty]
+                empty_paths.append(path.query[~is_nonempty])
+                query = path.query[is_nonempty]
+                if is_nonempty.any():
+                    next_paths.extend([
+                        QueryPath(
+                            query=query[grp],
+                            target=(
+                                children[path.target[pred[grp[0], :]], :]
+                                .compressed()
+                            ),
+                        ) for grp in groupby(pred, axis=1)
+                    ])
             paths = next_paths
+        if kind == 'left':
+            paths.append(QueryPath(
+                query=numpy.concatenate(empty_paths),
+                target=numpy.array([], dtype=int),
+            ))
         if sparse:
             return paths
         return _sparse_to_full(paths, len(obj))
 
-    def query(self, obj, predicate, sparse=False):
+    def query(self, obj, predicate, kind='inner', sparse=False):
         """
         Args:
             obj (EnvelopeVect): query objects
@@ -113,7 +127,7 @@ class BVH():
         def search_func(obj, envel):
             return getattr(obj, predicate)(envel)
 
-        return self.search(obj, search_func, sparse)
+        return self.search(obj, search_func, kind=kind, sparse=sparse)
 
     def nearest(self, obj, knn=1, sparse=False):
         """
@@ -131,7 +145,7 @@ class BVH():
                 )
             return (lower_bounds.T <= kth_upper_bounds).T  # Bdcast on 1st dim
 
-        return self.search(obj, search_func, sparse)
+        return self.search(obj, search_func, sparse=sparse)
 
 
 QueryPath = collections.namedtuple("QueryPath", "query target")
@@ -161,7 +175,7 @@ def groupby(arr, axis=1):
     """
     # Hash values using tobytes(), sort them, and performs a unix groupby
     # (via the uniq command)
-    hashes = numpy.apply_along_axis(lambda a: a.tobytes(), axis, arr)
+    hashes = (arr * 2**numpy.arange(arr.shape[1])).sum(axis=1)
     arg = numpy.argsort(hashes)
     _, ind = numpy.unique(hashes[arg], return_index=True)
     return numpy.split(arg, ind[1:])

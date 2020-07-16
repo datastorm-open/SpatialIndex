@@ -22,10 +22,15 @@ class AAMBRVect(EnvelopeVect):
         return self.mins.shape[1]
 
     def mergeby(self, indexes):
+        mask = numpy.repeat(indexes.mask, self.ndims).reshape(*indexes.shape, self.ndims)
         return self.__class__(
-            mins=numpy.array([self.mins[idx, :].min(axis=0) for idx in indexes]),
-            maxs=numpy.array([self.maxs[idx, :].max(axis=0) for idx in indexes]),
+            mins=numpy.ma.array(self.mins[indexes], mask=mask).min(axis=1).data,
+            maxs=numpy.ma.array(self.maxs[indexes], mask=mask).max(axis=1).data,
         )
+        # return self.__class__(
+        #     mins=numpy.array([self.mins[idx, :].min(axis=0) for idx in indexes]),
+        #     maxs=numpy.array([self.maxs[idx, :].max(axis=0) for idx in indexes]),
+        # )
 
     @property
     def centers(self):
