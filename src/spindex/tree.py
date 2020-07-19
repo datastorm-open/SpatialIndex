@@ -1,8 +1,6 @@
 """
 TODO
 """
-import pdb
-
 import collections
 
 import numpy
@@ -78,7 +76,7 @@ class BVH():
         for envel, children in zip(self.envelopes, self.children):
             next_paths = []
             for path in paths:
-                pred = search_func(obj[path.query], envel[path.target])
+                pred = search_func(path.query, envel[path.target])
                 # Early stopping for non-matching query geometries
                 is_nonempty = pred.any(axis=1)
                 pred = pred[is_nonempty]
@@ -95,16 +93,15 @@ class BVH():
                         ) for grp in groupby(pred, axis=1)
                     ])
             paths = next_paths
-        if kind == 'left':
-            paths.append(QueryPath(
-                query=numpy.concatenate(empty_paths),
-                target=numpy.array([], dtype=int),
-            ))
+        paths.append(QueryPath(
+            query=numpy.concatenate(empty_paths),
+            target=numpy.array([], dtype=int),
+        ))
         if sparse:
             return paths
         return _sparse_to_full(paths, len(obj))
 
-    def query(self, obj, predicate, kind='inner', sparse=False):
+    def query(self, obj, predicate, sparse=False):
         """
         Args:
             obj (EnvelopeVect): query objects
@@ -124,26 +121,33 @@ class BVH():
                 .format(predicate, self.valid_predicates)
             )
 
-        def search_func(obj, envel):
-            return getattr(obj, predicate)(envel)
+        def search_func(idx, envel):
+            return getattr(obj[idx], predicate)(envel)
 
-        return self.search(obj, search_func, kind=kind, sparse=sparse)
+        return self.search(obj, search_func, sparse=sparse)
 
     def nearest(self, obj, knn=1, sparse=False):
         """
         TODO
         """
-        def search_func(obj, envel):
-            lower_bounds, upper_bounds = obj.bound_dist(envel)
-            if upper_bounds.shape[1] <= knn:
-                kth_upper_bounds = upper_bounds.max(axis=1)
+        _bounds = numpy.full(shape=(len(obj), knn), fill_value=numpy.inf)
+
+        def knn_best(bounds):
+            if bounds.shape[1] <= knn:
+                fnc = numpy.sort
             else:
-                kth_upper_bounds = numpy.apply_along_axis(
-                    lambda arr: numpy.partition(arr.flatten(), kth=knn)[knn],
-                    axis=1,
-                    arr=upper_bounds,
-                )
-            return (lower_bounds.T <= kth_upper_bounds).T  # Bdcast on 1st dim
+                fnc = lambda arr: numpy.sort(numpy.partition(
+                    arr.flatten(), kth=knn)[:knn])
+            return numpy.apply_along_axis(fnc, axis=1, arr=bounds)
+
+        # Mutable default argument to share state between calls
+        def search_func(idx, envel, bounds=_bounds):
+            lower_bounds = obj[idx].distance(envel)
+            upper_bounds = obj[idx].maxmindist(envel)
+            bounds[idx, :] = knn_best(numpy.concatenate(
+                [bounds[idx], upper_bounds], axis=1))
+            kth = bounds[idx].max(axis=1)
+            return lower_bounds <= kth.reshape(*kth.shape, 1)
 
         return self.search(obj, search_func, sparse=sparse)
 
@@ -175,7 +179,8 @@ def groupby(arr, axis=1):
     """
     # Hash values using tobytes(), sort them, and performs a unix groupby
     # (via the uniq command)
-    hashes = (arr * 2**numpy.arange(arr.shape[1])).sum(axis=1)
+    hashes = numpy.apply_along_axis(
+        lambda a: a.tobytes(), axis=1, arr=arr)
     arg = numpy.argsort(hashes)
     _, ind = numpy.unique(hashes[arg], return_index=True)
     return numpy.split(arg, ind[1:])
