@@ -63,10 +63,21 @@ class BVH():
         """Returns the number of leaves."""
         return len(self.envelopes[-1])
 
-    def search(self, obj, search_func, sparse=False):
+    def search(self, obj, search_func, format="long"):
         """
         Bulk branch-and-bound search query with given predicate function.
+
+        Args:
+            format (str {"long", "wide", "sparse"}): 
+                long: Nx2-array of pairs of indices in obj and self.
+                wide: list parallel to obj of arrays of indices of self.
+                sparse: list of 2-tuples of arrays, one for indices in obj,
+                        the other for indicies in self.
         """
+        valid_formats = ("long", "wide", "sparse")
+        if format not in valid_formats:
+            raise ValueError("Invalid format '{}': must be one of {}"
+                             .format(format, valid_formats))
         # Cascading through levels to get matching indexes.
         paths = [QueryPath(
             query=numpy.arange(len(obj)),
@@ -97,11 +108,18 @@ class BVH():
             query=numpy.concatenate(empty_paths),
             target=numpy.array([], dtype=int),
         ))
-        if sparse:
+        # Remove duplicates in results
+        paths = [QueryPath(path.query, numpy.unique(path.target))
+                 for path in paths]
+        if format == "sparse":
             return paths
-        return _sparse_to_full(paths, len(obj))
+        result = _sparse_to_wide(paths, len(obj))
+        if format == "wide":
+            return result
+        if format == "long":
+            return _wide_to_long(result)
 
-    def query(self, obj, predicate, sparse=False):
+    def query(self, obj, predicate, format="long"):
         """
         Args:
             obj (EnvelopeVect): query objects
@@ -124,9 +142,9 @@ class BVH():
         def search_func(idx, envel):
             return getattr(obj[idx], predicate)(envel)
 
-        return self.search(obj, search_func, sparse=sparse)
+        return self.search(obj, search_func, format=format)
 
-    def nearest(self, obj, knn=1, sparse=False):
+    def nearest(self, obj, knn=1, format="long"):
         """
         TODO
         """
@@ -149,7 +167,7 @@ class BVH():
             kth = bounds[idx].max(axis=1)
             return lower_bounds <= kth.reshape(*kth.shape, 1)
 
-        return self.search(obj, search_func, sparse=sparse)
+        return self.search(obj, search_func, format=format)
 
 
 QueryPath = collections.namedtuple("QueryPath", "query target")
@@ -157,13 +175,18 @@ QueryPath = collections.namedtuple("QueryPath", "query target")
 # target geoms
 
 
-def _sparse_to_full(paths, length):
-    # Resulting valid paths are reordered in original obj order.
+def _sparse_to_wide(paths, length):
     result = [None]*length
     for path in paths:
         for i in path.query:
             result[i] = path.target
     return result
+
+
+def _wide_to_long(wide):
+    # reshaping does nothing, except if array is empty
+    return (numpy.array([(i, j) for i, arr in enumerate(wide) for j in arr])
+            .reshape(-1, 2))
 
 
 def groupby(arr, axis=1):
