@@ -92,12 +92,6 @@ def sort_tile_recurse(egeoms, page_size=16, max_top_size=1):
     return tree.BVH(envel[::-1], children[::-1])
 
 
-if __name__ == "__main__":
-    def get_geoms(n, ndims=2):
-        mins = numpy.random.rand(n, ndims)
-        maxs = numpy.random.rand(n, ndims)
-        return envelope.AAMBRVect(mins, mins+maxs)
-
     # Implementation with lists
     # def sort_tile_one(xs, nb_tiles):
     #     argx = numpy.argsort(xs)

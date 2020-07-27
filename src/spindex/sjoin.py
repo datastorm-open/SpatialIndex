@@ -1,4 +1,3 @@
-import pdb
 import functools
 
 import numpy
@@ -137,7 +136,9 @@ def _knn_join(lgeoms, rgeoms, lpgeoms, sidx, knn):
             (i, idx, geom.distance(ogeom))
             for (idx, ogeom) in zip(ridx, rgeoms.iloc[ridx])
         ])
-        return numpy.sort(dist[numpy.argpartition(dist[:, 2], kth=knn)[:knn]])
+        if dist.shape[0] > knn:
+            dist = dist[numpy.argpartition(dist[:, 2], kth=knn)[:knn]]
+        return numpy.sort(dist)
 
     candidates = sidx.nearest(lpgeoms, knn=knn, format="wide")
     wide_result = [knn_best(i, g, ridx)
