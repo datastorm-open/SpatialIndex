@@ -17,4 +17,4 @@ from .envelope import Envelopes, AAMBRs  # noqua: F401
 from .build import sort_tile_recurse  # noqa: F401
 from .tree import BVH  # noqa: F401
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
