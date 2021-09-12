@@ -22,7 +22,7 @@ class BVH():
         descriptive and general than R-Tree. The name comes from collision
         detection in computer graphics. In a bounding volume hierarchy, the
         bounding geometries (a.k.a envelopes) need not be axis-aligned
-        rectangles, nor even rectangles at all. We also add that a hierarchy
+        rectangles, nor even rectangles at all. We may add that a hierarchy
         need not be a single tree.
 
     Args:
@@ -30,7 +30,7 @@ class BVH():
         children: value of the children attribute.
 
     Attributes:
-        envelopes (list of EnvelopeVect): nodes' envelopes per tree level.
+        envelopes (list of Envelopes): nodes' envelopes per tree level.
             This replaces the doubly linked list of siblings by arrays.
         children (list of 1d-int-array): indices in the next levels envelopes
             defining this node's children.
@@ -125,7 +125,7 @@ class BVH():
                 kth_upper_bounds = upper_bounds.max(axis=1)
             else:
                 kth_upper_bounds = numpy.apply_along_axis(
-                    lambda arr: numpy.partition(arr.flatten(), kth=knn)[knn],
+                    lambda arr: numpy.partition(arr.flatten(), kth=knn)[knn-1],
                     axis=1,
                     arr=upper_bounds,
                 )

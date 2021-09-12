@@ -1,18 +1,109 @@
+=============
 API Reference
 =============
 
-Design Goals
-^^^^^^^^^^^^
+.. automodule:: spindex
+   :no-members:
+   :no-inherited-members:
 
-We have set a few goals for the API:
-
-    #. Use the most common interfaces possible. For example, GIShapes take for data input anything that implements a subset of the mapping API.
-    #. Make use of generators for lazy evaluation whenever it makes sense. For example, an index approximate nearest query generates candidates one after the other, which is perfect for true-knn queries since we do not know how many candidates will be required.
-    
-Packages
-^^^^^^^^
+Modules
+=======
 
 .. autosummary::
-   :toctree: modules
 
-    spindex
+    spindex.pandas
+    spindex.core.data_providers
+    spindex.core.enclosing_geometry
+    spindex.core.spatial_index
+    spindex.core.spatial_joins
+
+
+Pandas Wrapper: :mod:`spindex.pandas`
+=====================================
+
+.. automodule:: spindex.pandas
+   :no-members:
+   :no-inherited-members:
+
+
+Functions
+---------
+
+.. autosummary::
+   
+    st_join
+
+   
+Classes
+-------
+
+.. autosummary::
+
+    spindex.pandas.GeoFrame
+
+
+
+
+Core Data Providers: :mod:`spindex.core.data_providers`
+=======================================================
+
+.. automodule:: spindex.core.data_providers
+   :no-members:
+   :no-inherited-members:
+
+
+Classes
+-------
+
+.. autosummary::
+
+    BaseShapes
+    GIShapes
+
+
+Enclosing Geometries: :mod:`spindex.core.enclosing_geometry`
+============================================================
+
+.. automodule:: spindex.core.enclosing_geometry
+   :no-members:
+   :no-inherited-members:
+
+Classes
+-------
+
+.. autosummary::
+   
+    Enclosing_Geometry
+    Rect
+    Sphere
+
+
+Spatial Indexation: :mod:`spindex.core.spatial_index` 
+=====================================================
+
+.. automodule:: spindex.core.spatial_index
+   :no-members:
+   :no-inherited-members:
+
+Classes
+-------
+
+.. autosummary::
+   
+    DKMeans
+    IndexTree
+
+
+Spatial Joins: :mod:`spindex.core.spatial_joins`
+================================================
+
+.. automodule:: spindex.core.spatial_joins
+   :no-members:
+   :no-inherited-members:
+
+Functions
+---------
+
+.. autosummary::
+   
+    st_join

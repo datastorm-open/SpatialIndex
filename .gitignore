@@ -1,3 +1,7 @@
+pilotage/
+
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -65,7 +69,9 @@ instance/
 .scrapy
 
 # Sphinx documentation
-docs/_build/
+doc/_build/
+doc/_themes/
+doc/modules/
 
 # PyBuilder
 target/

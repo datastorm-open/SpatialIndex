@@ -1,11 +1,12 @@
 import numpy
 
 
-class EnvelopeVect:
+class Envelopes:
     pass
 
 
-class AAMBRVect(EnvelopeVect):
+class AAMBRs(Envelopes):
+    """Axis-aligned minimum bounding rectangle vectors."""
     def __init__(self, mins, maxs):
         # Assert ndims and len
         self.mins = mins
@@ -22,10 +23,15 @@ class AAMBRVect(EnvelopeVect):
         return self.mins.shape[1]
 
     def mergeby(self, indexes):
+        mask = numpy.repeat(indexes.mask, self.ndims, axis=1)
         return self.__class__(
-            mins=numpy.array([self.mins[idx, :].min(axis=0) for idx in indexes]),
-            maxs=numpy.array([self.maxs[idx, :].max(axis=0) for idx in indexes]),
+            mins=numpy.ma.array(self.mins[indexes], mask=mask).min(axis=1).data,
+            maxs=numpy.ma.array(self.maxs[indexes], mask=mask).max(axis=1).data,
         )
+        # return self.__class__(
+        #     mins=numpy.array([self.mins[idx, :].min(axis=0) for idx in indexes]),
+        #     maxs=numpy.array([self.maxs[idx, :].max(axis=0) for idx in indexes]),
+        # )
 
     @property
     def centers(self):
@@ -34,7 +40,7 @@ class AAMBRVect(EnvelopeVect):
     def check_dims(self, other):
         if self.ndims != other.ndims:
             raise ValueError(
-                "Incompatible number of dimensions {} and {} in {}.intersects."
+                "Incompatible number of dimensions {} and {}."
                 .format(self.ndims, other.ndims, self.__class__)
             )
 
@@ -62,7 +68,7 @@ class AAMBRVect(EnvelopeVect):
 
     def bound_dist(self, other):
         """
-        Perform both distance and maxmindist in a slightly more efficient way.
+        Performs both distance and maxmindist in a slightly more efficient way.
         """
         self.check_dims(other)
         dist = self._dist_by_dims(other)

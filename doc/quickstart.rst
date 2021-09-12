@@ -38,8 +38,14 @@ The query result is given in pseudo-code
 .. code-block:: none
 
     for each left geometry:
-	for each neighbour in the nearest-neighbours:
-	    add neighbour's attributes to left and yield
+	initialise a min heap of fixed length = number of neighbours.
+
+	do:
+	    ngbr <- get candidate from spatial index approximate nearest
+	    push ngbr to the heap
+	while the min distance from ngbr to left is less than the max distances from the heap elements to left
+
+	yield for each heap element its attributes added to left
 
 
 The number of neighbours is controlled by the `n_neighbours` argument. The distance between two geometries is given by Shapely's distance function: :code:`left.distance(right)`. This computes the minimum distance between the two underlying shapes `left` and `right`.
